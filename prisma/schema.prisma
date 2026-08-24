@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model SystemConfig {
+  key   String @id
+  value String
+}
+
+model Department {
+  id    String @id @default(uuid())
+  name  String
+  users User[]
+}
+
+model Supplier {
+  id                 String   @id @default(uuid())
+  cnpj               String?  // Pode ficar em branco
+  name               String
+  isActive           Boolean  @default(true)
+  inactivationReason String?
+  quotes             Quote[]
+}
+
+model PurchaseGroup {
+  id       String            @id @default(uuid())
+  name     String
+  requests PurchaseRequest[]
+}
+
+model User {
+  id               String            @id @default(uuid())
+  name             String
+  email            String            @unique
+  password         String            // Hashed in real app
+  role             String            // SOLICITANTE, COMPRADOR, AUTORIZADOR, ADMIN
+  departmentId     String?
+  department       Department?       @relation(fields: [departmentId], references: [id])
+  autoApproveLimit Float?            // Limite de alçada exclusivo para COMPRADOR
+  requests         PurchaseRequest[] @relation("Requester")
+  statusHistory    StatusHistory[]   @relation("HistoryActor")
+  comments         Comment[]         @relation("CommentAuthor")
+}
+
+model PurchaseRequest {
+  id              String          @id @default(uuid())
+  description     String
+  justification   String
+  link            String?
+  quantity        Int
+  priority        String?         // BAIXA, MEDIA, ALTA
+  currentStatus   String          @default("CRIADA")
+  
+  // Novos campos:
+  classification  String?         // Consumo, Equipamento, Serviço
+  groupId         String?
+  group           PurchaseGroup?  @relation(fields: [groupId], references: [id])
+  deliveryDate    DateTime?       // Previsão de Entrega
+  directorAcknowledged Boolean    @default(false)
+  
+  winnerCriteria     String?         // PRECO, QUALIDADE, URGENCIA
+  winnerJustification String?
+  archived           Boolean         @default(false)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  requesterId        String
+  requester          User            @relation("Requester", fields: [requesterId], references: [id])
+
+  quotes             Quote[]
+  history            StatusHistory[]
+  comments           Comment[]
+  attachments        Attachment[]
+}
+
+model Attachment {
+  id        String          @id @default(uuid())
+  url       String
+  name      String
+  createdAt DateTime        @default(now())
+  
+  requestId String
+  request   PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model Quote {
+  id              String          @id @default(uuid())
+  supplierName    String          // Mantido para compatibilidade, mas o correto é supplierId agora
+  supplierId      String?
+  supplier        Supplier?       @relation(fields: [supplierId], references: [id])
+  price           Float
+  negotiatedPrice Float?          // Valor negociado (desconto)
+  isWinner        Boolean         @default(false)
+  
+  requestId       String
+  request         PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model StatusHistory {
+  id             String          @id @default(uuid())
+  previousStatus String?
+  newStatus      String
+  observation    String?
+  date           DateTime        @default(now())
+
+  requestId      String
+  request        PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  userId         String
+  user           User            @relation("HistoryActor", fields: [userId], references: [id])
+}
+
+model Comment {
+  id        String          @id @default(uuid())
+  text      String
+  date      DateTime        @default(now())
+
+  requestId String
+  request   PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User            @relation("CommentAuthor", fields: [userId], references: [id])
+}
