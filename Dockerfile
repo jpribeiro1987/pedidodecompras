@@ -15,7 +15,7 @@ RUN npx prisma generate
 # Build the Next.js app
 RUN npm run build
 
-EXPOSE 3000
+EXPOSE 8080
 
 # The startup command runs prisma db push to ensure the database schema is up to date, then starts the app
 CMD ["sh", "-c", "npx prisma db push && npm start"]
