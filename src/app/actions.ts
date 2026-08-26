@@ -61,7 +61,6 @@ export async function getCurrentUser() {
     include: { department: true }
   })
 }
-
 export async function createRequestAction(formData: FormData) {
   const user = await getCurrentUser()
   if (!user || (user.role !== 'SOLICITANTE' && user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return { error: 'Não autorizado' }
@@ -77,32 +76,35 @@ export async function createRequestAction(formData: FormData) {
   }
 
   const itemsStr = formData.get('items') as string
-  let items = []
+  let items: any[] = []
   if (itemsStr) {
     items = JSON.parse(itemsStr)
-  } else {
-    // Fallback for extremely old legacy forms if hit somehow
-    const description = formData.get('description') as string
-    const quantity = parseInt(formData.get('quantity') as string, 10)
-    const link = formData.get('link') as string
-    const priority = formData.get('priority') as string
-    const classification = formData.get('classification') as string
-    const groupId = formData.get('groupId') as string
-    
-    if (description) {
-      items.push({ description, quantity, link, priority, classification, groupId })
-    }
   }
 
-  // Create a separate PurchaseRequest for each item
+  const batchId = crypto.randomUUID()
+
   try {
-    for (const item of items) {
+    for (let index = 0; index < items.length; index++) {
+      const item = items[index]
+      
+      let imageUrl = null
+      const file = formData.get(`item_image_${index}`) as File | null
+      if (file && file.size > 0) {
+        const bytes = await file.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+        const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
+        const uploadDir = join(process.cwd(), 'public/uploads')
+        await writeFile(join(uploadDir, filename), buffer)
+        imageUrl = `/uploads/${filename}`
+      }
+
       const newRequest = await prisma.purchaseRequest.create({
         data: {
           description: '(Múltiplos itens detalhados)',
           quantity: 1,
           link: null,
           justification,
+          batchId,
           priority: item.priority || 'MEDIA',
           classification: item.classification || 'Consumo',
           ...(item.groupId ? { group: { connect: { id: item.groupId } } } : {}),
@@ -111,7 +113,8 @@ export async function createRequestAction(formData: FormData) {
             create: [{
               description: item.description,
               quantity: parseInt(item.quantity, 10),
-              link: item.link || null
+              link: item.link || null,
+              imageUrl
             }]
           }
         }

@@ -10,7 +10,8 @@ export default async function SolicitanteDashboard() {
 
   const requests = await prisma.purchaseRequest.findMany({
     where: { requesterId: user.id, archived: false },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    include: { items: true }
   })
 
   const columns = [
@@ -49,10 +50,28 @@ export default async function SolicitanteDashboard() {
           gap: '1rem', 
           overflowX: 'auto', 
           flex: 1,
-          paddingBottom: '1rem' // For scrollbar
+          paddingBottom: '1rem'
         }}>
           {columns.map(col => {
             const colRequests = requests.filter(r => col.statuses.includes(r.currentStatus))
+            
+            // Agrupar por batchId se existir e estiverem na mesma coluna
+            const grouped: any[] = []
+            const map = new Map()
+            for (const req of colRequests) {
+              if (req.batchId) {
+                if (!map.has(req.batchId)) {
+                  map.set(req.batchId, [])
+                }
+                map.get(req.batchId).push(req)
+              } else {
+                grouped.push({ isBatch: false, requests: [req] })
+              }
+            }
+            map.forEach((reqs, batchId) => {
+              grouped.push({ isBatch: true, batchId, requests: reqs })
+            })
+            grouped.sort((a, b) => new Date(b.requests[0].createdAt).getTime() - new Date(a.requests[0].createdAt).getTime())
             
             return (
               <div key={col.id} style={{ 
@@ -77,7 +96,7 @@ export default async function SolicitanteDashboard() {
                 }}>
                   <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#1e293b' }}>{col.title}</h2>
                   <span style={{ backgroundColor: 'rgba(0,0,0,0.1)', color: '#1e293b', padding: '2px 8px', borderRadius: '999px', fontSize: '0.875rem', fontWeight: 600 }}>
-                    {colRequests.length}
+                    {grouped.length}
                   </span>
                 </div>
                 
@@ -89,47 +108,60 @@ export default async function SolicitanteDashboard() {
                   flexDirection: 'column',
                   gap: '0.75rem'
                 }}>
-                  {colRequests.map(req => (
-                    <div key={req.id} style={{ display: 'flex', flexDirection: 'column' }}>
-                      <Link href={`/dashboard/solicitante/pedido/${req.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <div style={{ 
-                          backgroundColor: 'white', 
-                          padding: '1rem', 
-                          borderRadius: '6px', 
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                          border: '1px solid #e2e8f0',
-                          cursor: 'pointer'
-                        }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>#{req.id.split('-')[0]}</span>
-                            {getStatusBadge(req.currentStatus)}
+                  {grouped.map(group => {
+                    const mainReq = group.requests[0];
+                    const isMulti = group.requests.length > 1;
+                    const itemsDesc = group.requests.map((r: any) => formatRequestItems(r)).join(', ');
+                    const totalQty = group.requests.reduce((acc: number, r: any) => acc + (r.items?.reduce((s: number, i: any) => s + i.quantity, 0) || r.quantity || 1), 0);
+
+                    return (
+                      <div key={group.isBatch ? group.batchId : mainReq.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Link href={`/dashboard/solicitante/pedido/${mainReq.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <div style={{ 
+                            backgroundColor: 'white', 
+                            padding: '1rem', 
+                            borderRadius: '6px', 
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                            border: '1px solid #e2e8f0',
+                            cursor: 'pointer'
+                          }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                                {isMulti ? `Pacote (${group.requests.length} pedidos)` : `#${mainReq.id.split('-')[0]}`}
+                              </span>
+                              {getStatusBadge(mainReq.currentStatus)}
+                            </div>
+                            <p style={{ fontWeight: 500, margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: '1.4' }}>
+                              {itemsDesc}
+                            </p>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                {new Date(mainReq.createdAt).toLocaleDateString('pt-BR')}
+                              </span>
+                              <span style={{ fontSize: '0.75rem', color: '#94a3b8', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
+                                Qtd Total: {totalQty}
+                              </span>
+                            </div>
                           </div>
-                          <p style={{ fontWeight: 500, margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: '1.4' }}>
-                            {formatRequestItems(req)}
-                          </p>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                              {new Date(req.createdAt).toLocaleDateString('pt-BR')}
-                            </span>
-                            <span style={{ fontSize: '0.75rem', color: '#94a3b8', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
-                              Qtd: {req.quantity}
-                            </span>
+                        </Link>
+                        {col.id === 'concluidas' && (
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                            {group.requests.map((req: any, idx: number) => (
+                              <form key={req.id} action={archiveRequestAction} style={{ flex: 1 }}>
+                                <input type="hidden" name="id" value={req.id} />
+                                <button type="submit" className="btn btn-primary" style={{ width: '100%', fontSize: '0.7rem', padding: '0.5rem', backgroundColor: '#334155', border: 'none' }} title={formatRequestItems(req)}>
+                                  Ocultar {isMulti ? (idx + 1) : ''}
+                                </button>
+                              </form>
+                            ))}
                           </div>
-                        </div>
-                      </Link>
-                      {col.id === 'concluidas' && (
-                        <form action={archiveRequestAction} style={{ marginTop: '0.5rem', textAlign: 'center' }}>
-                          <input type="hidden" name="id" value={req.id} />
-                          <button type="submit" className="btn btn-primary" style={{ width: '100%', fontSize: '0.75rem', padding: '0.5rem', backgroundColor: '#334155', border: 'none' }}>
-                            Concluir (Ocultar)
-                          </button>
-                        </form>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    )
+                  })}
                   
-                  {colRequests.length === 0 && (
+                  {grouped.length === 0 && (
                     <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.875rem', border: '2px dashed #e2e8f0', borderRadius: '6px' }}>
                       Vazio
                     </div>

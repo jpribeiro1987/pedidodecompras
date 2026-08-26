@@ -60,6 +60,7 @@ model PurchaseRequest {
   classification  String?         // Consumo, Equipamento, Serviço
   groupId         String?
   group           PurchaseGroup?  @relation(fields: [groupId], references: [id])
+  batchId         String?         // Agrupa múltiplos pedidos feitos juntos
   deliveryDate    DateTime?       // Previsão de Entrega
   directorAcknowledged Boolean    @default(false)
   
@@ -136,6 +137,7 @@ model PurchaseItem {
   description String
   quantity    Int
   link        String?
+  imageUrl    String?         // Opcional, arquivo ou print do item
   
   requestId   String
   request     PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)

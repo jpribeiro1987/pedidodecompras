@@ -14,6 +14,11 @@ export function RequestItemsDisplay({ request }: { request: any }) {
                     Acessar Link de Referência
                   </a>
                 )}
+                {item.imageUrl && (
+                  <a href={item.imageUrl} target="_blank" rel="noreferrer" style={{ color: '#10b981', textDecoration: 'underline', fontWeight: 600 }}>
+                    📷 Ver Anexo/Print
+                  </a>
+                )}
               </div>
             </div>
           ))}

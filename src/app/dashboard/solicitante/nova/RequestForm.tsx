@@ -20,7 +20,9 @@ export function RequestForm({
     link: '',
     priority: 'MEDIA',
     classification: 'Consumo',
-    groupId: ''
+    groupId: '',
+    file: null as File | null,
+    previewUrl: '' as string
   }])
   const [justification, setJustification] = useState('')
   const [loading, setLoading] = useState(false)
@@ -33,7 +35,9 @@ export function RequestForm({
       link: '',
       priority: 'MEDIA',
       classification: 'Consumo',
-      groupId: ''
+      groupId: '',
+      file: null,
+      previewUrl: ''
     }])
   }
 
@@ -49,13 +53,45 @@ export function RequestForm({
     setItems(newItems)
   }
 
+  const handlePaste = (index: number, e: React.ClipboardEvent) => {
+    const itemsData = e.clipboardData.items
+    for (let i = 0; i < itemsData.length; i++) {
+      if (itemsData[i].type.indexOf('image') !== -1) {
+        const file = itemsData[i].getAsFile()
+        if (file) {
+          updateItem(index, 'file', file)
+          updateItem(index, 'previewUrl', URL.createObjectURL(file))
+        }
+      }
+    }
+  }
+
+  const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      updateItem(index, 'file', file)
+      updateItem(index, 'previewUrl', URL.createObjectURL(file))
+    }
+  }
+
   return (
     <form action={async (formData) => {
       setLoading(true)
       setErrorMsg('')
       try {
-        formData.append('items', JSON.stringify(items))
+        const itemsWithoutFiles = items.map(item => {
+          const { file, previewUrl, ...rest } = item
+          return rest
+        })
+        formData.append('items', JSON.stringify(itemsWithoutFiles))
         formData.append('justification', justification)
+        
+        items.forEach((item, index) => {
+          if (item.file) {
+            formData.append(`item_image_${index}`, item.file)
+          }
+        })
+        
         const res = await createRequestAction(formData)
         
         if (res?.error) {
@@ -84,25 +120,44 @@ export function RequestForm({
               <option key={u.id} value={u.id}>{u.name} ({u.department?.name || 'Sem Setor'})</option>
             ))}
           </select>
-          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Você pode criar um pedido em nome de outro usuário.</span>
         </div>
       )}
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem', color: '#1e293b' }}>Itens da Solicitação</h3>
+      <div>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Itens da Solicitação</h2>
         
         {items.map((item, index) => (
-          <div key={index} style={{ padding: '1rem', border: '1px solid #e2e8f0', borderRadius: '8px', marginBottom: '1rem', backgroundColor: '#f8fafc', position: 'relative' }}>
+          <div 
+            key={index} 
+            style={{ 
+              padding: '1.5rem', 
+              border: '1px solid #e2e8f0', 
+              borderRadius: '8px', 
+              marginBottom: '1rem',
+              backgroundColor: '#f8fafc',
+              position: 'relative'
+            }}
+            onPaste={(e) => handlePaste(index, e)}
+          >
             {items.length > 1 && (
               <button 
                 type="button" 
                 onClick={() => removeItem(index)}
-                style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'none', border: 'none', color: '#ef4444', fontWeight: 600, cursor: 'pointer' }}
+                style={{ 
+                  position: 'absolute', 
+                  top: '1rem', 
+                  right: '1rem', 
+                  background: 'none', 
+                  border: 'none', 
+                  color: '#ef4444',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
               >
                 Remover
               </button>
             )}
-            
+
             <div style={{ marginBottom: '1rem' }}>
               <label>O que você precisa comprar? (Item {index + 1}) *</label>
               <input 
@@ -134,8 +189,34 @@ export function RequestForm({
                   className="input-field" 
                   value={item.link}
                   onChange={e => updateItem(index, 'link', e.target.value)}
-                  placeholder="Ex: https://site.com/produto" 
+                  placeholder="https://..." 
                 />
+              </div>
+            </div>
+
+            {/* Imagem / Print */}
+            <div style={{ marginBottom: '1rem', borderTop: '1px dashed #cbd5e1', paddingTop: '1rem' }}>
+              <label>Anexar Imagem ou Colar Print (Opcional)</label>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.5rem' }}>Dica: Você pode dar Ctrl+V nesta área para colar uma captura de tela.</p>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(index, e)}
+                  style={{ fontSize: '0.9rem' }}
+                />
+                
+                {item.previewUrl && (
+                  <div style={{ position: 'relative' }}>
+                    <img src={item.previewUrl} alt="Preview" style={{ height: '60px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    <button 
+                      type="button"
+                      onClick={() => { updateItem(index, 'file', null); updateItem(index, 'previewUrl', ''); }}
+                      style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '10px' }}
+                    >X</button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -187,10 +268,11 @@ export function RequestForm({
         
         <button 
           type="button" 
+          className="btn" 
+          style={{ width: '100%', marginBottom: '2rem', border: '2px dashed #cbd5e1', color: '#64748b' }}
           onClick={addItem}
-          style={{ background: 'none', border: '1px dashed #cbd5e1', padding: '0.75rem', width: '100%', borderRadius: '8px', color: '#3b82f6', fontWeight: 600, cursor: 'pointer' }}
         >
-          + Adicionar mais um item
+          + Adicionar Outro Item
         </button>
       </div>
 
@@ -208,7 +290,7 @@ export function RequestForm({
       </div>
 
       <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-        {loading ? 'Criando Solicitação...' : 'Criar Solicitação'}
+        {loading ? 'Processando...' : 'Criar Solicitação'}
       </button>
     </form>
   )
