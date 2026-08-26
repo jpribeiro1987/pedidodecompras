@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createRequestAction } from '@/app/actions'
+import { useRouter } from 'next/navigation'
 
 export function RequestForm({ 
   groups, 
@@ -12,6 +13,7 @@ export function RequestForm({
   targetUsers?: any[], 
   isComprador?: boolean
 }) {
+  const router = useRouter()
   const [items, setItems] = useState([{ 
     description: '', 
     quantity: 1, 
@@ -22,6 +24,7 @@ export function RequestForm({
   }])
   const [justification, setJustification] = useState('')
   const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
 
   const addItem = () => {
     setItems([...items, { 
@@ -47,10 +50,32 @@ export function RequestForm({
   }
 
   return (
-    <form action={createRequestAction} className="card">
-      <input type="hidden" name="items" value={JSON.stringify(items)} />
-      <input type="hidden" name="justification" value={justification} />
+    <form action={async (formData) => {
+      setLoading(true)
+      setErrorMsg('')
+      try {
+        formData.append('items', JSON.stringify(items))
+        formData.append('justification', justification)
+        const res = await createRequestAction(formData)
+        
+        if (res?.error) {
+          setErrorMsg(res.error)
+          setLoading(false)
+        } else if (res?.success && res.redirectUrl) {
+          router.push(res.redirectUrl)
+        }
+      } catch (err: any) {
+        setErrorMsg(err.message || 'Erro crítico')
+        setLoading(false)
+      }
+    }} className="card">
       
+      {errorMsg && (
+        <div style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #f87171' }}>
+          <strong>Erro:</strong> {errorMsg}
+        </div>
+      )}
+
       {isComprador && (
         <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
           <label htmlFor="requesterId" style={{ fontWeight: 600, color: '#334155' }}>Solicitante Original (Criando em nome de:)</label>

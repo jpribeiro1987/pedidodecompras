@@ -125,16 +125,14 @@ export async function createRequestAction(formData: FormData) {
         }
       })
     }
-  } catch (err) {
+    
+    revalidatePath('/dashboard/solicitante')
+    revalidatePath('/dashboard/comprador')
+    return { success: true, redirectUrl: `/dashboard/${user.role.toLowerCase()}` }
+  } catch (err: any) {
     console.error('CREATE REQUEST ERROR:', err);
-    throw err;
+    return { error: err.message || 'Erro ao criar pedido no banco de dados' }
   }
-
-  revalidatePath('/dashboard/solicitante')
-  revalidatePath('/dashboard/comprador')
-  
-  // Since we created multiple requests, we redirect back to the list instead of a specific request details page
-  redirect(`/dashboard/${user.role.toLowerCase()}`)
 }
 
 export async function extendDeliveryDateAction(formData: FormData) {
