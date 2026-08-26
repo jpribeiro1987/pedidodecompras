@@ -5,14 +5,12 @@ import { createRequestAction } from '@/app/actions'
 
 export function RequestForm({ 
   groups, 
-  users, 
-  currentUserRole,
-  currentUserId 
+  targetUsers, 
+  isComprador 
 }: { 
   groups: any[], 
-  users: any[], 
-  currentUserRole: string,
-  currentUserId: string
+  targetUsers?: any[], 
+  isComprador?: boolean
 }) {
   const [items, setItems] = useState([{ description: '', quantity: 1, link: '' }])
   const [loading, setLoading] = useState(false)
@@ -41,15 +39,15 @@ export function RequestForm({
       await createRequestAction(formData)
     }} className="card">
       
-      {currentUserRole !== 'SOLICITANTE' && (
+      {isComprador && (
         <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
           <label htmlFor="requesterId" style={{ fontWeight: 600, color: '#334155' }}>Solicitante Original (Criando em nome de:)</label>
-          <select id="requesterId" name="requesterId" className="input-field" defaultValue={currentUserId}>
-            {users.map(u => (
+          <select id="requesterId" name="requesterId" className="input-field">
+            {targetUsers?.map(u => (
               <option key={u.id} value={u.id}>{u.name} ({u.department?.name || 'Sem Setor'})</option>
             ))}
           </select>
-          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Como {currentUserRole === 'COMPRADOR' ? 'Comprador' : 'Autorizador'}, você pode criar um pedido em nome de outro usuário.</span>
+          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Você pode criar um pedido em nome de outro usuário.</span>
         </div>
       )}
 
