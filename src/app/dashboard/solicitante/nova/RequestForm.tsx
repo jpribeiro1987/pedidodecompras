@@ -47,13 +47,9 @@ export function RequestForm({
   }
 
   return (
-    <form action={async (formData) => {
-      setLoading(true)
-      // Append complex fields
-      formData.append('items', JSON.stringify(items))
-      formData.append('justification', justification)
-      await createRequestAction(formData)
-    }} className="card">
+    <form action={createRequestAction} className="card">
+      <input type="hidden" name="items" value={JSON.stringify(items)} />
+      <input type="hidden" name="justification" value={justification} />
       
       {isComprador && (
         <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>

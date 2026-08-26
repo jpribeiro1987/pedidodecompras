@@ -95,34 +95,39 @@ export async function createRequestAction(formData: FormData) {
   }
 
   // Create a separate PurchaseRequest for each item
-  for (const item of items) {
-    const newRequest = await prisma.purchaseRequest.create({
-      data: {
-        description: null,
-        quantity: null,
-        link: null,
-        justification,
-        priority: item.priority || 'MEDIA',
-        classification: item.classification || 'Consumo',
-        groupId: item.groupId || null,
-        requesterId: targetRequesterId,
-        items: {
-          create: [{
-            description: item.description,
-            quantity: parseInt(item.quantity, 10),
-            link: item.link || null
-          }]
+  try {
+    for (const item of items) {
+      const newRequest = await prisma.purchaseRequest.create({
+        data: {
+          description: null,
+          quantity: null,
+          link: null,
+          justification,
+          priority: item.priority || 'MEDIA',
+          classification: item.classification || 'Consumo',
+          groupId: item.groupId || null,
+          requesterId: targetRequesterId,
+          items: {
+            create: [{
+              description: item.description,
+              quantity: parseInt(item.quantity, 10),
+              link: item.link || null
+            }]
+          }
         }
-      }
-    })
+      })
 
-    await prisma.statusHistory.create({
-      data: {
-        newStatus: 'CRIADA',
-        requestId: newRequest.id,
-        userId: user.id
-      }
-    })
+      await prisma.statusHistory.create({
+        data: {
+          newStatus: 'CRIADA',
+          requestId: newRequest.id,
+          userId: user.id
+        }
+      })
+    }
+  } catch (err) {
+    console.error('CREATE REQUEST ERROR:', err);
+    throw err;
   }
 
   revalidatePath('/dashboard/solicitante')
