@@ -8,16 +8,18 @@ import { writeFile } from 'fs/promises'
 import { join } from 'path'
 
 export async function loginAction(formData: FormData) {
-  const email = formData.get('email') as string
+  const rawEmail = formData.get('email') as string
   const password = formData.get('password') as string
 
-  if (!email || !password) {
+  if (!rawEmail || !password) {
     return { error: 'E-mail e senha são obrigatórios' }
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email }
-  })
+  // Fetch all users to do case-insensitive match since SQLite doesn't support mode: insensitive
+  const email = rawEmail.trim().toLowerCase()
+  
+  const users = await prisma.user.findMany()
+  const user = users.find(u => u.email.toLowerCase() === email)
 
   if (!user || user.password !== password) {
     return { error: 'E-mail ou senha inválidos' }

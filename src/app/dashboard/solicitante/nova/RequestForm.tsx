@@ -14,27 +14,6 @@ export function RequestForm({
 }) {
   const [files, setFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
-  
-  const handlePaste = (e: React.ClipboardEvent) => {
-    const items = e.clipboardData.items
-    const newFiles: File[] = []
-    
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf('image') !== -1) {
-        const file = items[i].getAsFile()
-        if (file) {
-          const ext = file.type.split('/')[1] || 'png'
-          const renamedFile = new File([file], `print-${Date.now()}.${ext}`, { type: file.type })
-          newFiles.push(renamedFile)
-        }
-      }
-    }
-    
-    if (newFiles.length > 0) {
-      setFiles(prev => [...prev, ...newFiles])
-    }
-  }
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files)
@@ -92,7 +71,7 @@ export function RequestForm({
   }
 
   return (
-    <form className="card" onSubmit={handleSubmit} onPaste={handlePaste} encType="multipart/form-data">
+    <form className="card" onSubmit={handleSubmit} encType="multipart/form-data">
       
       {isComprador && targetUsers && (
         <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#e0e7ff', borderRadius: '4px', border: '1px solid #c7d2fe' }}>

@@ -7,9 +7,11 @@ services:
       - "8080:8080"
     volumes:
       - prisma_data:/app/prisma
+      - uploads_data:/app/public/uploads
     environment:
       - DATABASE_URL=file:./dev.db
       - NODE_ENV=production
 
 volumes:
   prisma_data:
+  uploads_data:
