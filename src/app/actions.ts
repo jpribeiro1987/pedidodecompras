@@ -100,9 +100,9 @@ export async function createRequestAction(formData: FormData) {
 
       const newRequest = await prisma.purchaseRequest.create({
         data: {
-          description: '(Múltiplos itens detalhados)',
-          quantity: 1,
-          link: null,
+          description: item.description,
+          quantity: parseInt(item.quantity, 10),
+          link: item.link || null,
           justification,
           batchId,
           priority: item.priority || 'MEDIA',

@@ -56,8 +56,11 @@ export default async function AutorizadorPedidoPage({ params }: { params: Promis
                 </div>
               )}
               <div style={{ gridColumn: '1 / -1' }}>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Descrição</p>
-                <p style={{ fontWeight: 500 }}>{request.description} (Qtd: {request.quantity})</p>
+                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Descrição Principal</p>
+                <p style={{ fontWeight: 500 }}>
+                  {request.items && request.items.length > 0 ? request.items[0].description : request.description} 
+                  (Qtd: {request.items && request.items.length > 0 ? request.items[0].quantity : request.quantity})
+                </p>
               </div>
             </div>
 

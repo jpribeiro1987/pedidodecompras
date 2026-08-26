@@ -17,6 +17,7 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
       requester: { include: { department: true } },
       quotes: true,
       attachments: true,
+      items: true,
       history: {
         include: { user: true },
         orderBy: { date: 'desc' }
@@ -26,6 +27,15 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
 
   if (!request) {
     notFound()
+  }
+
+  let batchRequests = [request]
+  if (request.batchId) {
+    batchRequests = await prisma.purchaseRequest.findMany({
+      where: { batchId: request.batchId },
+      include: { items: true, quotes: true }
+    })
+    batchRequests.sort((a, b) => a.id.localeCompare(b.id))
   }
 
   // Only the requester or other roles can view this
@@ -62,19 +72,40 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
               Informações do Pedido
             </h2>
             
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#334155', marginBottom: '0.75rem' }}>Itens do Pacote</h3>
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                {batchRequests.map((req, idx) => {
+                  const reqItem = (req.items && req.items.length > 0) ? req.items[0] : req;
+                  return (
+                    <div key={req.id} style={{ padding: '1rem', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <span style={{ fontWeight: 600, fontSize: '1rem' }}>{idx + 1}. {reqItem.description}</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.25rem 0.5rem', backgroundColor: '#e2e8f0', borderRadius: '999px' }}>
+                          Status: {req.currentStatus}
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
+                        <div><strong>Quantidade:</strong> {reqItem.quantity}</div>
+                        <div><strong>Prioridade:</strong> {req.priority || 'Não definida'}</div>
+                        {reqItem.link && (
+                          <div style={{ gridColumn: '1 / -1' }}>
+                            <strong>Link:</strong> <a href={reqItem.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Acessar</a>
+                          </div>
+                        )}
+                        {reqItem.imageUrl && (
+                          <div style={{ gridColumn: '1 / -1' }}>
+                            <strong>Anexo/Print:</strong> <a href={reqItem.imageUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 600 }}>📷 Ver Imagem</a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+            
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-              <div>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Descrição</p>
-                <p style={{ fontWeight: 500 }}>{request.description}</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Quantidade</p>
-                <p>{request.quantity}</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Prioridade</p>
-                <p>{request.priority || 'Não definida'}</p>
-              </div>
               {request.deliveryDate && (
                 <div>
                   <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Previsão de Entrega</p>
@@ -93,24 +124,16 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
                   </p>
                 </div>
               )}
-              {request.link && (
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Link de Referência</p>
-                  <a href={request.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>
-                    {request.link}
-                  </a>
-                </div>
-              )}
             </div>
 
             <div style={{ padding: '1rem', backgroundColor: '#f1f5f9', borderRadius: 'var(--radius)' }}>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500, marginBottom: '0.5rem' }}>Justificativa</p>
+              <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500, marginBottom: '0.5rem' }}>Justificativa Global</p>
               <p style={{ whiteSpace: 'pre-wrap' }}>{request.justification}</p>
             </div>
 
             {request.attachments && request.attachments.length > 0 && (
               <div style={{ marginTop: '1.5rem' }}>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500, marginBottom: '0.5rem' }}>Anexos</p>
+                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500, marginBottom: '0.5rem' }}>Anexos Extras</p>
                 <AttachmentViewer attachments={request.attachments} />
               </div>
             )}
