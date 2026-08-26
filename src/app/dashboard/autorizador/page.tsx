@@ -13,7 +13,7 @@ export default async function AutorizadorDashboard() {
       currentStatus: 'AGUARDANDO_AUTORIZACAO'
     },
     orderBy: { createdAt: 'asc' },
-    include: { requester: true, quotes: true }
+    include: { requester: true, quotes: true, items: true }
   })
 
   // Autorizador also sees requests that need acknowledgement
@@ -23,7 +23,7 @@ export default async function AutorizadorDashboard() {
       currentStatus: { in: ['AGUARDANDO_FINANCEIRO', 'APROVADA'] }
     },
     orderBy: { createdAt: 'desc' },
-    include: { requester: true, quotes: true }
+    include: { requester: true, quotes: true, items: true }
   })
 
   return (

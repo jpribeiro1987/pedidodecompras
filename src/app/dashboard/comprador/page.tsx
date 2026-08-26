@@ -15,7 +15,7 @@ export default async function CompradorDashboard() {
       }
     },
     orderBy: { createdAt: 'asc' },
-    include: { requester: true }
+    include: { requester: true, items: true }
   })
 
   return (
