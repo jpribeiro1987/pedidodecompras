@@ -31,7 +31,9 @@ export default async function EstatisticasPage() {
   let totalVolume = 0
   approvedWithQuotes.forEach(req => {
     if (req.quotes.length > 0) {
-      totalVolume += (req.quotes[0].price * req.quantity)
+      const quote = req.quotes[0]
+      const finalPrice = quote.negotiatedPrice ? quote.negotiatedPrice : quote.price
+      totalVolume += finalPrice // The user inputs the total value, not unit value
     }
   })
 
