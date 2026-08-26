@@ -105,8 +105,8 @@ export async function createRequestAction(formData: FormData) {
           justification,
           priority: item.priority || 'MEDIA',
           classification: item.classification || 'Consumo',
-          groupId: item.groupId || null,
-          requesterId: targetRequesterId,
+          ...(item.groupId ? { group: { connect: { id: item.groupId } } } : {}),
+          requester: { connect: { id: targetRequesterId } },
           items: {
             create: [{
               description: item.description,
@@ -120,8 +120,8 @@ export async function createRequestAction(formData: FormData) {
       await prisma.statusHistory.create({
         data: {
           newStatus: 'CRIADA',
-          requestId: newRequest.id,
-          userId: user.id
+          request: { connect: { id: newRequest.id } },
+          user: { connect: { id: user.id } }
         }
       })
     }
