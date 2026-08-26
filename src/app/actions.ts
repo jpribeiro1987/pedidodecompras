@@ -67,9 +67,6 @@ export async function createRequestAction(formData: FormData) {
   if (!user || (user.role !== 'SOLICITANTE' && user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return { error: 'Não autorizado' }
 
   const justification = formData.get('justification') as string
-  const priority = formData.get('priority') as string
-  const classification = formData.get('classification') as string
-  const groupId = formData.get('groupId') as string
   let targetRequesterId = user.id
 
   if (user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR') {
@@ -83,43 +80,56 @@ export async function createRequestAction(formData: FormData) {
   let items = []
   if (itemsStr) {
     items = JSON.parse(itemsStr)
+  } else {
+    // Fallback for extremely old legacy forms if hit somehow
+    const description = formData.get('description') as string
+    const quantity = parseInt(formData.get('quantity') as string, 10)
+    const link = formData.get('link') as string
+    const priority = formData.get('priority') as string
+    const classification = formData.get('classification') as string
+    const groupId = formData.get('groupId') as string
+    
+    if (description) {
+      items.push({ description, quantity, link, priority, classification, groupId })
+    }
   }
 
-  const oldDescription = formData.get('description') as string
-  const oldQuantity = parseInt(formData.get('quantity') as string, 10)
-  const oldLink = formData.get('link') as string
+  // Create a separate PurchaseRequest for each item
+  for (const item of items) {
+    const newRequest = await prisma.purchaseRequest.create({
+      data: {
+        description: null,
+        quantity: null,
+        link: null,
+        justification,
+        priority: item.priority || 'MEDIA',
+        classification: item.classification || 'Consumo',
+        groupId: item.groupId || null,
+        requesterId: targetRequesterId,
+        items: {
+          create: [{
+            description: item.description,
+            quantity: parseInt(item.quantity, 10),
+            link: item.link || null
+          }]
+        }
+      }
+    })
 
-  const newRequest = await prisma.purchaseRequest.create({
-    data: {
-      description: items.length > 0 ? null : oldDescription,
-      quantity: items.length > 0 ? null : oldQuantity,
-      link: items.length > 0 ? null : (oldLink || null),
-      justification,
-      priority,
-      classification,
-      groupId: groupId || null,
-      requesterId: targetRequesterId,
-      items: items.length > 0 ? {
-        create: items.map((i: any) => ({
-          description: i.description,
-          quantity: parseInt(i.quantity, 10),
-          link: i.link || null
-        }))
-      } : undefined
-    }
-  })
-
-  await prisma.statusHistory.create({
-    data: {
-      newStatus: 'CRIADA',
-      requestId: newRequest.id,
-      userId: user.id
-    }
-  })
+    await prisma.statusHistory.create({
+      data: {
+        newStatus: 'CRIADA',
+        requestId: newRequest.id,
+        userId: user.id
+      }
+    })
+  }
 
   revalidatePath('/dashboard/solicitante')
   revalidatePath('/dashboard/comprador')
-  redirect(`/dashboard/${user.role.toLowerCase()}/pedido/${newRequest.id}`)
+  
+  // Since we created multiple requests, we redirect back to the list instead of a specific request details page
+  redirect(`/dashboard/${user.role.toLowerCase()}`)
 }
 
 export async function extendDeliveryDateAction(formData: FormData) {

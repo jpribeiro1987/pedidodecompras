@@ -12,11 +12,26 @@ export function RequestForm({
   targetUsers?: any[], 
   isComprador?: boolean
 }) {
-  const [items, setItems] = useState([{ description: '', quantity: 1, link: '' }])
+  const [items, setItems] = useState([{ 
+    description: '', 
+    quantity: 1, 
+    link: '',
+    priority: 'MEDIA',
+    classification: 'Consumo',
+    groupId: ''
+  }])
+  const [justification, setJustification] = useState('')
   const [loading, setLoading] = useState(false)
 
   const addItem = () => {
-    setItems([...items, { description: '', quantity: 1, link: '' }])
+    setItems([...items, { 
+      description: '', 
+      quantity: 1, 
+      link: '',
+      priority: 'MEDIA',
+      classification: 'Consumo',
+      groupId: ''
+    }])
   }
 
   const removeItem = (index: number) => {
@@ -34,8 +49,9 @@ export function RequestForm({
   return (
     <form action={async (formData) => {
       setLoading(true)
-      // Append items as JSON string to the formData
+      // Append complex fields
       formData.append('items', JSON.stringify(items))
+      formData.append('justification', justification)
       await createRequestAction(formData)
     }} className="card">
       
@@ -78,7 +94,7 @@ export function RequestForm({
               />
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem', marginBottom: '1rem' }}>
               <div>
                 <label>Quantidade *</label>
                 <input 
@@ -101,6 +117,50 @@ export function RequestForm({
                 />
               </div>
             </div>
+
+            {/* Novas Configurações Individuais */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', paddingTop: '1rem', borderTop: '1px dashed #cbd5e1' }}>
+              <div>
+                <label>Prioridade *</label>
+                <select 
+                  className="input-field" 
+                  value={item.priority}
+                  onChange={e => updateItem(index, 'priority', e.target.value)}
+                  required
+                >
+                  <option value="BAIXA">Baixa (Rotina)</option>
+                  <option value="MEDIA">Média</option>
+                  <option value="ALTA">Alta (Urgente)</option>
+                </select>
+              </div>
+              <div>
+                <label>Classificação *</label>
+                <select 
+                  className="input-field" 
+                  value={item.classification}
+                  onChange={e => updateItem(index, 'classification', e.target.value)}
+                  required
+                >
+                  <option value="Consumo">Material de Consumo</option>
+                  <option value="Equipamento">Equipamento</option>
+                  <option value="Serviço">Serviço</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+              <div>
+                <label>Grupo de Compra</label>
+                <select 
+                  className="input-field" 
+                  value={item.groupId}
+                  onChange={e => updateItem(index, 'groupId', e.target.value)}
+                >
+                  <option value="">Nenhum (Padrão)</option>
+                  {groups.map(g => (
+                    <option key={g.id} value={g.id}>{g.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
         ))}
         
@@ -114,37 +174,16 @@ export function RequestForm({
       </div>
 
       <div style={{ marginBottom: '1.5rem' }}>
-        <label htmlFor="justification">Qual a justificativa da compra? *</label>
-        <textarea id="justification" name="justification" className="input-field" rows={3} required placeholder="Explique por que precisamos destes itens..."></textarea>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-        <div>
-          <label htmlFor="priority">Prioridade *</label>
-          <select id="priority" name="priority" className="input-field" required>
-            <option value="BAIXA">Baixa (Rotina)</option>
-            <option value="MEDIA">Média</option>
-            <option value="ALTA">Alta (Urgente)</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="classification">Classificação *</label>
-          <select id="classification" name="classification" className="input-field" required>
-            <option value="Consumo">Material de Consumo</option>
-            <option value="Equipamento">Equipamento</option>
-            <option value="Serviço">Serviço</option>
-            <option value="Outros">Outros</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="groupId">Grupo de Compra</label>
-          <select id="groupId" name="groupId" className="input-field">
-            <option value="">Nenhum (Padrão)</option>
-            {groups.map(g => (
-              <option key={g.id} value={g.id}>{g.name}</option>
-            ))}
-          </select>
-        </div>
+        <label htmlFor="justification">Qual a justificativa global da compra? *</label>
+        <textarea 
+          id="justification" 
+          className="input-field" 
+          rows={3} 
+          required 
+          value={justification}
+          onChange={e => setJustification(e.target.value)}
+          placeholder="Explique por que precisamos destes itens..."
+        />
       </div>
 
       <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
