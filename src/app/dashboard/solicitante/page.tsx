@@ -1,3 +1,4 @@
+import { formatRequestItems } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser, archiveRequestAction } from '@/app/actions'
 import Link from 'next/link'
@@ -105,7 +106,7 @@ export default async function SolicitanteDashboard() {
                             {getStatusBadge(req.currentStatus)}
                           </div>
                           <p style={{ fontWeight: 500, margin: '0 0 0.5rem 0', fontSize: '0.95rem', lineHeight: '1.4' }}>
-                            {req.description}
+                            {formatRequestItems(req)}
                           </p>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
                             <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>

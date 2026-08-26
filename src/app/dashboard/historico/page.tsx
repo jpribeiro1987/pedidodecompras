@@ -1,3 +1,4 @@
+import { formatRequestItems } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/app/actions'
 import Link from 'next/link'
@@ -96,7 +97,7 @@ export default async function HistoricoGeralPage({
                     {new Date(req.createdAt).toLocaleDateString('pt-BR')}
                   </td>
                   <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem' }}>{req.id.split('-')[0]}</td>
-                  <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{req.description}</td>
+                  <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{formatRequestItems(req)}</td>
                   <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem' }}>
                     <strong>{req.requester.name}</strong><br />
                     <span style={{ color: '#64748b' }}>{req.requester.department?.name || 'Sem Setor'}</span>

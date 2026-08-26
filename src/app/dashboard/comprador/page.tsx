@@ -1,3 +1,4 @@
+import { formatRequestItems } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser, archiveBuyerRequestAction } from '@/app/actions'
 import Link from 'next/link'
@@ -48,7 +49,7 @@ export default async function CompradorDashboard() {
                   <tr key={req.id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem' }}>{req.id.split('-')[0]}</td>
                     <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{req.requester.name}</td>
-                    <td style={{ padding: '1rem 0.5rem' }}>{req.description}</td>
+                    <td style={{ padding: '1rem 0.5rem' }}>{formatRequestItems(req)}</td>
                     <td style={{ padding: '1rem 0.5rem' }}>
                       <span style={{ 
                         display: 'inline-block', 

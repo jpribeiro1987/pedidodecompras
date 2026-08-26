@@ -1,3 +1,4 @@
+import { formatRequestItems } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/app/actions'
 import Link from 'next/link'
@@ -53,7 +54,7 @@ export default async function AutorizadorDashboard() {
                 <tr key={req.id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem' }}>{req.id.split('-')[0]}</td>
                   <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{req.requester.name}</td>
-                  <td style={{ padding: '1rem 0.5rem' }}>{req.description}</td>
+                  <td style={{ padding: '1rem 0.5rem' }}>{formatRequestItems(req)}</td>
                   <td style={{ padding: '1rem 0.5rem', fontWeight: 600, color: 'var(--primary)' }}>
                     {(() => {
                       const winnerQuote = req.quotes?.find(q => q.isWinner)
@@ -103,7 +104,7 @@ export default async function AutorizadorDashboard() {
                 <tr key={req.id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem' }}>{req.id.split('-')[0]}</td>
                   <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{req.requester.name}</td>
-                  <td style={{ padding: '1rem 0.5rem' }}>{req.description}</td>
+                  <td style={{ padding: '1rem 0.5rem' }}>{formatRequestItems(req)}</td>
                   <td style={{ padding: '1rem 0.5rem', fontWeight: 600, color: '#16a34a' }}>
                     {(() => {
                       const winnerQuote = req.quotes?.find(q => q.isWinner)

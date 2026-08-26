@@ -1,3 +1,4 @@
+import { formatRequestItems } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/app/actions'
 import Link from 'next/link'
@@ -141,7 +142,7 @@ export default async function RelatoriosPage({
                       </div>
                     </td>
                     <td style={{ padding: '1rem 0.5rem' }}>
-                      {req.description}
+                      {formatRequestItems(req)}
                       <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
                         {req.classification || '-'}
                       </div>

@@ -1,3 +1,4 @@
+import { RequestItemsDisplay } from '@/components/RequestItemsDisplay'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/app/actions'
 import Link from 'next/link'

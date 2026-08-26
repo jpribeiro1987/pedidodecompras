@@ -49,10 +49,10 @@ model User {
 
 model PurchaseRequest {
   id              String          @id @default(uuid())
-  description     String
+  description     String?
   justification   String
   link            String?
-  quantity        Int
+  quantity        Int?
   priority        String?         // BAIXA, MEDIA, ALTA
   currentStatus   String          @default("CRIADA")
   
@@ -76,6 +76,9 @@ model PurchaseRequest {
   history            StatusHistory[]
   comments           Comment[]
   attachments        Attachment[]
+
+  items              PurchaseItem[]
+
 }
 
 model Attachment {
@@ -125,4 +128,15 @@ model Comment {
 
   userId    String
   user      User            @relation("CommentAuthor", fields: [userId], references: [id])
+}
+
+
+model PurchaseItem {
+  id          String          @id @default(uuid())
+  description String
+  quantity    Int
+  link        String?
+  
+  requestId   String
+  request     PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
 }

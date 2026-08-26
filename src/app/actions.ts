@@ -66,12 +66,8 @@ export async function createRequestAction(formData: FormData) {
   const user = await getCurrentUser()
   if (!user || (user.role !== 'SOLICITANTE' && user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return { error: 'Não autorizado' }
 
-  const description = formData.get('description') as string
   const justification = formData.get('justification') as string
-  const link = formData.get('link') as string
   const priority = formData.get('priority') as string
-  const quantity = parseInt(formData.get('quantity') as string, 10)
-  
   const classification = formData.get('classification') as string
   const groupId = formData.get('groupId') as string
   let targetRequesterId = user.id
@@ -83,51 +79,47 @@ export async function createRequestAction(formData: FormData) {
     }
   }
 
+  const itemsStr = formData.get('items') as string
+  let items = []
+  if (itemsStr) {
+    items = JSON.parse(itemsStr)
+  }
+
+  const oldDescription = formData.get('description') as string
+  const oldQuantity = parseInt(formData.get('quantity') as string, 10)
+  const oldLink = formData.get('link') as string
+
   const newRequest = await prisma.purchaseRequest.create({
     data: {
-      description,
+      description: items.length > 0 ? null : oldDescription,
+      quantity: items.length > 0 ? null : oldQuantity,
+      link: items.length > 0 ? null : (oldLink || null),
       justification,
-      link: link || null,
       priority,
-      quantity,
       classification,
-      groupId,
+      groupId: groupId || null,
       requesterId: targetRequesterId,
-      history: {
-        create: {
-          previousStatus: 'N/A',
-          newStatus: 'CRIADA',
-          observation: user.id !== targetRequesterId ? `Solicitação criada por ${user.name}` : 'Solicitação criada',
-          userId: user.id
-        }
-      }
+      items: items.length > 0 ? {
+        create: items.map((i: any) => ({
+          description: i.description,
+          quantity: parseInt(i.quantity, 10),
+          link: i.link || null
+        }))
+      } : undefined
     }
   })
 
-  // Handle files
-  const files = formData.getAll('files') as File[]
-  for (const file of files) {
-    if (file.size > 0) {
-      const bytes = await file.arrayBuffer()
-      const buffer = Buffer.from(bytes)
-      
-      const fileName = `${newRequest.id}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-      const uploadDir = join(process.cwd(), 'public', 'uploads')
-      const filePath = join(uploadDir, fileName)
-      
-      await writeFile(filePath, buffer)
-      
-      await prisma.attachment.create({
-        data: {
-          name: file.name,
-          url: `/uploads/${fileName}`,
-          requestId: newRequest.id
-        }
-      })
+  await prisma.statusHistory.create({
+    data: {
+      newStatus: 'CRIADA',
+      requestId: newRequest.id,
+      userId: user.id
     }
-  }
+  })
 
-  redirect('/dashboard/solicitante')
+  revalidatePath('/dashboard/solicitante')
+  revalidatePath('/dashboard/comprador')
+  redirect(`/dashboard/${user.role.toLowerCase()}/pedido/${newRequest.id}`)
 }
 
 export async function extendDeliveryDateAction(formData: FormData) {
