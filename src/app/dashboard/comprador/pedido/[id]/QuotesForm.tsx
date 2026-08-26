@@ -5,15 +5,7 @@ import { updateRequestStatusAction } from '@/app/actions'
 import { createSupplierAction } from '@/app/adminActions'
 import { useRouter } from 'next/navigation'
 
-export function QuotesForm({ 
-  requestId, 
-  suppliers = [], 
-  autoApproveLimit = 0 
-}: { 
-  requestId: string, 
-  suppliers?: any[], 
-  autoApproveLimit?: number 
-}) {
+export function QuotesForm({ requestId, suppliers = [], autoApproveLimit = 0, criteriaList = [] }: { requestId: string, suppliers?: any[], autoApproveLimit?: number, criteriaList?: string[] }) {
   const router = useRouter()
   // Start with 1 quote to allow single-supplier quotes
   const [quotes, setQuotes] = useState([{ supplierId: '', price: '', negotiatedPrice: '', supplierSearch: '' }])
