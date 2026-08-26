@@ -11,7 +11,7 @@ export async function GET(
   const filename = resolvedParams.filename
   
   // Safe path joining to prevent directory traversal
-  const safeFilename = filename.replace(/[^a-zA-Z0-9.-_]/g, '')
+  const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '')
   const filePath = join(process.cwd(), 'public', 'uploads', safeFilename)
 
   if (!existsSync(filePath)) {
