@@ -187,3 +187,15 @@ export async function updateConfigAction(formData: FormData) {
   })
   revalidatePath("/dashboard/admin/configuracoes")
 }
+
+export async function updateWinnerCriteriaAction(criteria: string[]) {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'ADMIN') return { error: 'Não autorizado' }
+  await prisma.systemConfig.upsert({
+    where: { key: 'WINNER_CRITERIA_LIST' },
+    update: { value: JSON.stringify(criteria) },
+    create: { key: 'WINNER_CRITERIA_LIST', value: JSON.stringify(criteria) }
+  })
+  revalidatePath('/dashboard/admin/criterios')
+  revalidatePath('/dashboard/comprador')
+}

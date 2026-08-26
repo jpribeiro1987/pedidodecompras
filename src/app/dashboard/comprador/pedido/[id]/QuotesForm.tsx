@@ -18,7 +18,7 @@ export function QuotesForm({
   // Start with 1 quote to allow single-supplier quotes
   const [quotes, setQuotes] = useState([{ supplierId: '', price: '', negotiatedPrice: '', supplierSearch: '' }])
   const [winnerIndex, setWinnerIndex] = useState<number>(0)
-  const [winnerCriteria, setWinnerCriteria] = useState('PRECO')
+  const [winnerCriteria, setWinnerCriteria] = useState(criteriaList[0] || 'Menor Preço')
   const [deliveryDate, setDeliveryDate] = useState('')
   
   const [showSupplierModal, setShowSupplierModal] = useState(false)
@@ -175,9 +175,7 @@ export function QuotesForm({
           <div>
             <label htmlFor="winnerCriteria">Critério de Escolha do Vencedor</label>
             <select id="winnerCriteria" name="winnerCriteria" className="input-field" value={winnerCriteria} onChange={e => setWinnerCriteria(e.target.value)} required>
-              <option value="PRECO">Menor Preço</option>
-              <option value="QUALIDADE">Melhor Qualidade</option>
-              <option value="URGENCIA">Prazo de Entrega / Urgência</option>
+              {criteriaList.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div>
@@ -188,7 +186,7 @@ export function QuotesForm({
 
         <div style={{ marginBottom: '1.5rem' }}>
           <label htmlFor="winnerJustification">Justificativa da Escolha (Obrigatório se não for o Menor Preço)</label>
-          <textarea id="winnerJustification" name="winnerJustification" className="input-field" rows={2} required={winnerCriteria !== 'PRECO'} placeholder="Explique por que esta cotação foi a escolhida..." />
+          <textarea id="winnerJustification" name="winnerJustification" className="input-field" rows={2} required={winnerCriteria !== (criteriaList[0] || 'Menor Preço')} placeholder="Explique por que esta cotação foi a escolhida..." />
         </div>
 
         {canAutoApprove ? (

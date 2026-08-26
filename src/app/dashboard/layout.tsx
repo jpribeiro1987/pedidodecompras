@@ -36,6 +36,9 @@ export default async function DashboardLayout({
               <Link href="/dashboard/admin/grupos" style={{ display: 'block', padding: '0.75rem 1rem', textDecoration: 'none', color: 'white', fontWeight: 500, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '4px', marginBottom: '0.5rem' }}>
                 Grupos de Compras
               </Link>
+              <Link href="/dashboard/admin/criterios" style={{ display: 'block', padding: '0.75rem 1rem', textDecoration: 'none', color: 'white', fontWeight: 500, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '4px', marginBottom: '0.5rem' }}>
+                Critérios de Escolha
+              </Link>
               <Link href="/dashboard/admin/configuracoes" style={{ display: 'block', padding: '0.75rem 1rem', textDecoration: 'none', color: 'white', fontWeight: 500, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '4px', marginBottom: '0.5rem' }}>
                 Configurações
               </Link>

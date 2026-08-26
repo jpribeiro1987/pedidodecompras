@@ -143,7 +143,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                 )}
               </>
             ) : ['CRIADA', 'EM_COTACAO', 'AGUARDANDO_AUTORIZACAO'].includes(request.currentStatus) ? (
-              <QuotesForm requestId={request.id} suppliers={suppliers} autoApproveLimit={autoApproveLimit} />
+              <QuotesForm requestId={request.id} suppliers={suppliers} autoApproveLimit={autoApproveLimit} criteriaList={criteriaList} />
             ) : null}
 
             {['CRIADA', 'EM_COTACAO', 'AGUARDANDO_AUTORIZACAO', 'AGUARDANDO_FINANCEIRO'].includes(request.currentStatus) && (
