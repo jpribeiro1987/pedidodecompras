@@ -42,59 +42,90 @@ export default async function CompradorDashboard() {
               </tr>
             </thead>
             <tbody>
-              {requests.map(req => {
-                const canArchive = req.currentStatus === 'APROVADA' || req.currentStatus === 'RECUSADA'
+              {(() => {
+                const grouped: any[] = []
+                const map = new Map()
+                for (const req of requests) {
+                  if (req.batchId) {
+                    if (!map.has(req.batchId)) {
+                      map.set(req.batchId, [])
+                    }
+                    map.get(req.batchId).push(req)
+                  } else {
+                    grouped.push({ isBatch: false, requests: [req] })
+                  }
+                }
+                map.forEach((reqs, batchId) => {
+                  grouped.push({ isBatch: true, batchId, requests: reqs })
+                })
+                grouped.sort((a, b) => new Date(a.requests[0].createdAt).getTime() - new Date(b.requests[0].createdAt).getTime())
                 
-                return (
-                  <tr key={req.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem' }}>{req.id.split('-')[0]}</td>
-                    <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{req.requester.name}</td>
-                    <td style={{ padding: '1rem 0.5rem' }}>{formatRequestItems(req)}</td>
-                    <td style={{ padding: '1rem 0.5rem' }}>
-                      <span style={{ 
-                        display: 'inline-block', 
-                        padding: '0.25rem 0.5rem', 
-                        borderRadius: '999px', 
-                        fontSize: '0.75rem', 
-                        fontWeight: 600,
-                        backgroundColor: '#fef3c7',
-                        color: '#b45309'
-                      }}>
-                        {req.currentStatus}
-                      </span>
-                    </td>
-                    <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
-                      {new Date(req.createdAt).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td style={{ padding: '1rem 0.5rem' }}>
-                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <Link href={`/dashboard/comprador/pedido/${req.id}`} className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
-                          Analisar
-                        </Link>
-                        
-                        <form action={archiveBuyerRequestAction}>
-                          <input type="hidden" name="id" value={req.id} />
-                          <button 
-                            type="submit" 
-                            disabled={!canArchive}
-                            className="btn"
-                            style={{ 
-                              fontSize: '0.75rem', 
-                              padding: '0.25rem 0.75rem',
-                              backgroundColor: canArchive ? '#f1f5f9' : '#e2e8f0',
-                              color: canArchive ? '#475569' : '#94a3b8',
-                              cursor: canArchive ? 'pointer' : 'not-allowed',
-                              border: '1px solid #cbd5e1'
-                            }}
-                          >
-                            Arquivar
-                          </button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
+                return grouped.map(group => {
+                  const req = group.requests[0]
+                  const isMulti = group.requests.length > 1
+                  const canArchive = req.currentStatus === 'APROVADA' || req.currentStatus === 'RECUSADA'
+                  
+                  return (
+                    <tr key={group.isBatch ? group.batchId : req.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem' }}>
+                        {isMulti ? `Pacote (${group.requests.length})` : req.id.split('-')[0]}
+                      </td>
+                      <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{req.requester.name}</td>
+                      <td style={{ padding: '1rem 0.5rem' }}>
+                        {group.requests.map((r: any) => formatRequestItems(r)).join(', ')}
+                      </td>
+                      <td style={{ padding: '1rem 0.5rem' }}>
+                        {isMulti ? (
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Vários</span>
+                        ) : (
+                          <span style={{ 
+                            display: 'inline-block', 
+                            padding: '0.25rem 0.5rem', 
+                            borderRadius: '999px', 
+                            fontSize: '0.75rem', 
+                            fontWeight: 600,
+                            backgroundColor: '#fef3c7',
+                            color: '#b45309'
+                          }}>
+                            {req.currentStatus}
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
+                        {new Date(req.createdAt).toLocaleDateString('pt-BR')}
+                      </td>
+                      <td style={{ padding: '1rem 0.5rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <Link href={isMulti ? `/dashboard/comprador/lote/${group.batchId}` : `/dashboard/comprador/pedido/${req.id}`} className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
+                            Analisar {isMulti ? 'Pacote' : ''}
+                          </Link>
+                          
+                          {!isMulti && (
+                            <form action={archiveBuyerRequestAction}>
+                              <input type="hidden" name="id" value={req.id} />
+                              <button 
+                                type="submit" 
+                                disabled={!canArchive}
+                                className="btn"
+                                style={{ 
+                                  fontSize: '0.75rem', 
+                                  padding: '0.25rem 0.75rem',
+                                  backgroundColor: canArchive ? '#f1f5f9' : '#e2e8f0',
+                                  color: canArchive ? '#475569' : '#94a3b8',
+                                  cursor: canArchive ? 'pointer' : 'not-allowed',
+                                  border: '1px solid #cbd5e1'
+                                }}
+                              >
+                                Arquivar
+                              </button>
+                            </form>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              })()}
             </tbody>
           </table>
         )}
