@@ -27,6 +27,14 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
   if (!request) notFound()
 
   const suppliers = await prisma.supplier.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } })
+
+  const config = await prisma.systemConfig.findUnique({ where: { key: 'WINNER_CRITERIA_LIST' } })
+  const defaultCriteria = ['Menor Preço', 'Melhor Qualidade', 'Prazo de Entrega / Urgência', 'Fornecedor Exclusivo']
+  let criteriaList = defaultCriteria
+  if (config) {
+    try { criteriaList = JSON.parse(config.value) } catch(e) {}
+  }
+
   const configLimit = await prisma.systemConfig.findUnique({ where: { key: 'AUTO_APPROVE_LIMIT' } })
   const globalLimit = configLimit ? parseFloat(configLimit.value) : 0
   const autoApproveLimit = user.autoApproveLimit !== null ? user.autoApproveLimit : globalLimit
