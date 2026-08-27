@@ -369,3 +369,56 @@ export async function archiveBuyerRequestAction(formData: FormData) {
   
   revalidatePath('/dashboard/comprador')
 }
+
+export async function assignBuyerAction(formData: FormData) {
+  const user = await getCurrentUser()
+  if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) return { error: 'Não autorizado' }
+
+  const id = formData.get('id') as string
+  const isBatch = formData.get('isBatch') === 'true'
+
+  if (isBatch) {
+    const request = await prisma.purchaseRequest.findUnique({ where: { id } })
+    if (request?.batchId) {
+      await prisma.purchaseRequest.updateMany({
+        where: { batchId: request.batchId },
+        data: { buyerId: user.id }
+      })
+    }
+  } else {
+    await prisma.purchaseRequest.update({
+      where: { id },
+      data: { buyerId: user.id }
+    })
+  }
+
+  revalidatePath('/dashboard/comprador')
+}
+
+export async function transferBuyerAction(formData: FormData) {
+  const user = await getCurrentUser()
+  if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) return { error: 'Não autorizado' }
+
+  const id = formData.get('id') as string
+  const newBuyerId = formData.get('buyerId') as string
+  const isBatch = formData.get('isBatch') === 'true'
+
+  if (!newBuyerId) return { error: 'Nenhum comprador selecionado' }
+
+  if (isBatch) {
+    const request = await prisma.purchaseRequest.findUnique({ where: { id } })
+    if (request?.batchId) {
+      await prisma.purchaseRequest.updateMany({
+        where: { batchId: request.batchId },
+        data: { buyerId: newBuyerId }
+      })
+    }
+  } else {
+    await prisma.purchaseRequest.update({
+      where: { id },
+      data: { buyerId: newBuyerId }
+    })
+  }
+
+  revalidatePath('/dashboard/comprador')
+}

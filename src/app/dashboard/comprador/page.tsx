@@ -1,21 +1,33 @@
 import { formatRequestItems } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser, archiveBuyerRequestAction } from '@/app/actions'
+import { getCurrentUser, archiveBuyerRequestAction, assignBuyerAction, transferBuyerAction } from '@/app/actions'
 import Link from 'next/link'
 
 export default async function CompradorDashboard() {
   const user = await getCurrentUser()
-  if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return null
+  if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) return null
 
-  // Comprador sees requests that are CRIADA or EM_ANALISE or EM_COTACAO
+  const whereClause: any = {
+    currentStatus: {
+      in: ['CRIADA', 'EM_ANALISE', 'EM_COTACAO', 'DEVOLVIDO', 'AGUARDANDO_FINANCEIRO', 'APROVADA', 'RECUSADA']
+    }
+  }
+
+  if (user.role === 'COMPRADOR') {
+    whereClause.OR = [
+      { buyerId: null },
+      { buyerId: user.id }
+    ]
+  }
+
   const requests = await prisma.purchaseRequest.findMany({
-    where: {
-      currentStatus: {
-        in: ['CRIADA', 'EM_ANALISE', 'EM_COTACAO', 'DEVOLVIDO', 'AGUARDANDO_FINANCEIRO', 'APROVADA', 'RECUSADA']
-      }
-    },
+    where: whereClause,
     orderBy: { createdAt: 'asc' },
-    include: { requester: true, items: true }
+    include: { requester: true, items: true, buyer: true }
+  })
+
+  const allBuyers = await prisma.user.findMany({
+    where: { role: 'COMPRADOR' }
   })
 
   return (
@@ -37,7 +49,7 @@ export default async function CompradorDashboard() {
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Solicitante</th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Descrição</th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Status</th>
-                <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Data</th>
+                <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Responsável</th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Ações</th>
               </tr>
             </thead>
@@ -64,6 +76,7 @@ export default async function CompradorDashboard() {
                   const req = group.requests[0]
                   const isMulti = group.requests.length > 1
                   const canArchive = req.currentStatus === 'APROVADA' || req.currentStatus === 'RECUSADA'
+                  const currentBuyer = req.buyer
                   
                   return (
                     <tr key={group.isBatch ? group.batchId : req.id} style={{ borderBottom: '1px solid var(--border)' }}>
@@ -91,13 +104,38 @@ export default async function CompradorDashboard() {
                           </span>
                         )}
                       </td>
-                      <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
-                        {new Date(req.createdAt).toLocaleDateString('pt-BR')}
+                      <td style={{ padding: '1rem 0.5rem' }}>
+                        {currentBuyer ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1e40af' }}>{currentBuyer.name}</span>
+                            {(user.role === 'AUTORIZADOR' || user.role === 'ADMIN' || currentBuyer.id === user.id) && (
+                              <form action={transferBuyerAction} style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+                                <input type="hidden" name="id" value={req.id} />
+                                <input type="hidden" name="isBatch" value={isMulti ? "true" : "false"} />
+                                <select name="buyerId" style={{ fontSize: '0.7rem', padding: '0.1rem', maxWidth: '100px' }} required>
+                                  <option value="">Transferir...</option>
+                                  {allBuyers.filter(b => b.id !== currentBuyer.id).map(b => (
+                                    <option key={b.id} value={b.id}>{b.name}</option>
+                                  ))}
+                                </select>
+                                <button type="submit" className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '0.1rem 0.25rem' }}>Ok</button>
+                              </form>
+                            )}
+                          </div>
+                        ) : (
+                          <form action={assignBuyerAction}>
+                            <input type="hidden" name="id" value={req.id} />
+                            <input type="hidden" name="isBatch" value={isMulti ? "true" : "false"} />
+                            <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#10b981', border: 'none' }}>
+                              Assumir {isMulti ? 'Pacote' : 'Pedido'}
+                            </button>
+                          </form>
+                        )}
                       </td>
                       <td style={{ padding: '1rem 0.5rem' }}>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                           <Link href={isMulti ? `/dashboard/comprador/lote/${group.batchId}` : `/dashboard/comprador/pedido/${req.id}`} className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
-                            Analisar {isMulti ? 'Pacote' : ''}
+                            Analisar
                           </Link>
                           
                           {!isMulti && (

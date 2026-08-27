@@ -43,6 +43,7 @@ model User {
   department       Department?       @relation(fields: [departmentId], references: [id])
   autoApproveLimit Float?            // Limite de alçada exclusivo para COMPRADOR
   requests         PurchaseRequest[] @relation("Requester")
+  requestsAssigned PurchaseRequest[] @relation("AssignedBuyer")
   statusHistory    StatusHistory[]   @relation("HistoryActor")
   comments         Comment[]         @relation("CommentAuthor")
 }
@@ -72,6 +73,9 @@ model PurchaseRequest {
 
   requesterId        String
   requester          User            @relation("Requester", fields: [requesterId], references: [id])
+
+  buyerId            String?
+  buyer              User?           @relation("AssignedBuyer", fields: [buyerId], references: [id])
 
   quotes             Quote[]
   history            StatusHistory[]
