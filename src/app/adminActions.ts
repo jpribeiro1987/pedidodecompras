@@ -121,7 +121,7 @@ export async function deleteUserAction(formData: FormData) {
 // ----- SUPPLIERS -----
 export async function createSupplierAction(formData: FormData) {
   const user = await getCurrentUser()
-  if (!user || (user.role !== "ADMIN" && user.role !== "COMPRADOR")) throw new Error("Unauthorized")
+  if (!user || (user.role !== "ADMIN" && user.role !== "COMPRADOR" && user.role !== "AUTORIZADOR")) throw new Error("Unauthorized")
 
   const name = formData.get("name") as string
   const cnpj = formData.get("cnpj") as string
