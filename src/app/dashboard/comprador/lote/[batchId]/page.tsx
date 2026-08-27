@@ -105,9 +105,15 @@ export default async function LoteCompradorPage({ params }: { params: Promise<{ 
                   </td>
                   <td style={{ padding: '1rem 0.5rem' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <Link href={`/dashboard/comprador/pedido/${req.id}`} className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
-                        Analisar
-                      </Link>
+                      {(!currentBuyer || currentBuyer.id === user.id || user.role === 'AUTORIZADOR' || user.role === 'ADMIN') ? (
+                        <Link href={`/dashboard/comprador/pedido/${req.id}`} className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>
+                          Analisar
+                        </Link>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem', backgroundColor: '#e2e8f0', color: '#94a3b8', borderRadius: '4px', cursor: 'not-allowed' }}>
+                          Em uso
+                        </span>
+                      )}
                       
                       <form action={archiveBuyerRequestAction}>
                         <input type="hidden" name="id" value={req.id} />
