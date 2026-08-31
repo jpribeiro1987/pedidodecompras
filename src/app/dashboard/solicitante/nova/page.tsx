@@ -30,7 +30,7 @@ export default async function NovaSolicitacaoPage() {
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0 }}>Nova Solicitação de Compra</h1>
       </div>
 
-      <RequestForm groups={groups} targetUsers={targetUsers} isComprador={user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR'} />
+      <RequestForm user={user} groups={groups} targetUsers={targetUsers} isComprador={user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR'} departments={departments} />
     </div>
   )
 }

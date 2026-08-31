@@ -5,13 +5,17 @@ import { createRequestAction } from '@/app/actions'
 import { useRouter } from 'next/navigation'
 
 export function RequestForm({ 
+  user,
   groups, 
   targetUsers, 
-  isComprador 
+  isComprador,
+  departments = []
 }: { 
+  user: any,
   groups: any[], 
   targetUsers?: any[], 
-  isComprador?: boolean
+  isComprador?: boolean,
+  departments?: any[]
 }) {
   const router = useRouter()
   const [items, setItems] = useState([{ 
