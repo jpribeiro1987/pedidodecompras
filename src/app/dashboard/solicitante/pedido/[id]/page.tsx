@@ -109,12 +109,12 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
               {request.deliveryDate && (
                 <div>
                   <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Previsão de Entrega</p>
-                  <p>{new Date(request.deliveryDate).toLocaleDateString('pt-BR')}</p>
+                  <p>{new Date(request.deliveryDate).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</p>
                 </div>
               )}
               <div>
                 <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Data da Solicitação</p>
-                <p>{new Date(request.createdAt).toLocaleDateString('pt-BR')}</p>
+                <p>{new Date(request.createdAt).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</p>
               </div>
               {winnerQuote && (
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -158,7 +158,7 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
                   
                   <p style={{ fontSize: '0.875rem', fontWeight: 600 }}>{hist.newStatus}</p>
                   <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>
-                    {new Date(hist.date).toLocaleString('pt-BR')} por {hist.user.name}
+                    {new Date(hist.date).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })} por {hist.user.name}
                   </p>
                   {hist.observation && (
                     <p style={{ fontSize: '0.875rem', backgroundColor: '#f8fafc', padding: '0.5rem', borderRadius: '4px', marginTop: '0.25rem' }}>

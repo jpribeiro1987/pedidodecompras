@@ -66,7 +66,7 @@ export default async function AdminBackupPage() {
               {files.map(f => (
                 <tr key={f.name} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '1rem 0.5rem', fontWeight: 500, color: 'var(--primary)' }}>{f.name}</td>
-                  <td style={{ padding: '1rem 0.5rem' }}>{f.date.toLocaleString('pt-BR')}</td>
+                  <td style={{ padding: '1rem 0.5rem' }}>{f.date.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</td>
                   <td style={{ padding: '1rem 0.5rem' }}>{(f.size / 1024).toFixed(2)} KB</td>
                   <td style={{ padding: '1rem 0.5rem' }}>
                     <form action={restoreBackupAction} style={{ display: 'inline' }}>

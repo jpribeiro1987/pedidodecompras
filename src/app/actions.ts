@@ -151,7 +151,7 @@ export async function extendDeliveryDateAction(formData: FormData) {
   const currentRequest = await prisma.purchaseRequest.findUnique({ where: { id: requestId } })
   if (!currentRequest) return { error: 'Not found' }
 
-  const dataStr = new Date(newDate + 'T12:00:00Z').toLocaleDateString('pt-BR')
+  const dataStr = new Date(newDate + 'T12:00:00Z').toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
 
   await prisma.purchaseRequest.update({
     where: { id: requestId },

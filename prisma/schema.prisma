@@ -107,6 +107,7 @@ model Quote {
   supplier        Supplier?       @relation(fields: [supplierId], references: [id])
   price           Float
   negotiatedPrice Float?          // Valor negociado (desconto)
+  freight         Float?          @default(0)
   isWinner        Boolean         @default(false)
   
   requestId       String

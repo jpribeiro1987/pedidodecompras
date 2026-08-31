@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 export function QuotesForm({ requestId, suppliers = [], autoApproveLimit = 0, criteriaList = [] }: { requestId: string, suppliers?: any[], autoApproveLimit?: number, criteriaList?: string[] }) {
   const router = useRouter()
   // Start with 1 quote to allow single-supplier quotes
-  const [quotes, setQuotes] = useState([{ supplierId: '', price: '', negotiatedPrice: '', supplierSearch: '' }])
+  const [quotes, setQuotes] = useState([{ supplierId: '', price: '', negotiatedPrice: '', freight: '', supplierSearch: '' }])
   const [winnerIndex, setWinnerIndex] = useState<number>(0)
   const [winnerCriteria, setWinnerCriteria] = useState(criteriaList[0] || 'Menor Preço')
   const [deliveryDate, setDeliveryDate] = useState('')
@@ -22,7 +22,7 @@ export function QuotesForm({ requestId, suppliers = [], autoApproveLimit = 0, cr
   const [consultSearch, setConsultSearch] = useState('')
 
   const addQuote = () => {
-    setQuotes([...quotes, { supplierId: '', price: '', negotiatedPrice: '', supplierSearch: '' }])
+    setQuotes([...quotes, { supplierId: '', price: '', negotiatedPrice: '', freight: '', supplierSearch: '' }])
   }
 
   const removeQuote = (index: number) => {
@@ -32,7 +32,7 @@ export function QuotesForm({ requestId, suppliers = [], autoApproveLimit = 0, cr
     if (winnerIndex >= newQuotes.length) setWinnerIndex(0)
   }
 
-  const handleQuoteChange = (index: number, field: 'supplierId' | 'price' | 'negotiatedPrice' | 'supplierSearch', value: string) => {
+  const handleQuoteChange = (index: number, field: 'supplierId' | 'price' | 'negotiatedPrice' | 'freight' | 'supplierSearch', value: string) => {
     const newQuotes = [...quotes]
     newQuotes[index][field] = value
     setQuotes(newQuotes)
@@ -57,7 +57,7 @@ export function QuotesForm({ requestId, suppliers = [], autoApproveLimit = 0, cr
 
   // Calculate winner value to check against limit
   const winnerQuote = quotes[winnerIndex]
-  const winnerValue = parseFloat(winnerQuote?.negotiatedPrice || winnerQuote?.price || '0')
+  const winnerValue = parseFloat(winnerQuote?.negotiatedPrice || winnerQuote?.price || '0') + parseFloat(winnerQuote?.freight || '0')
   const canAutoApprove = winnerValue > 0 && winnerValue <= autoApproveLimit
 
   return (

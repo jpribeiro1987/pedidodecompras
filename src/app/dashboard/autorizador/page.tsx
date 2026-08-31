@@ -64,7 +64,7 @@ export default async function AutorizadorDashboard() {
                     })()}
                   </td>
                   <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
-                    {new Date(req.createdAt).toLocaleDateString('pt-BR')}
+                    {new Date(req.createdAt).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
                   </td>
                   <td style={{ padding: '1rem 0.5rem' }}>
                     <Link href={`/dashboard/autorizador/pedido/${req.id}`} className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem' }}>

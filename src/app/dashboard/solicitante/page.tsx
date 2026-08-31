@@ -137,7 +137,7 @@ export default async function SolicitanteDashboard() {
                             </p>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
                               <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                {new Date(mainReq.createdAt).toLocaleDateString('pt-BR')}
+                                {new Date(mainReq.createdAt).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
                               </span>
                               <span style={{ fontSize: '0.75rem', color: '#94a3b8', backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
                                 Qtd Total: {totalQty}

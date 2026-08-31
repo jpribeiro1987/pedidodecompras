@@ -161,7 +161,7 @@ export default async function RelatoriosPage({
                       </span>
                     </td>
                     <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
-                      {new Date(req.createdAt).toLocaleDateString('pt-BR')}
+                      {new Date(req.createdAt).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
                     </td>
                     <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem' }}>
                       {winnerQuote ? (

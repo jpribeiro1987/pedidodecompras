@@ -80,7 +80,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
               {request.deliveryDate && (
                 <div>
                   <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Previsão de Entrega</p>
-                  <p>{new Date(request.deliveryDate).toLocaleDateString('pt-BR')}</p>
+                  <p>{new Date(request.deliveryDate).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</p>
                 </div>
               )}
               <div style={{ gridColumn: '1 / -1' }}>
