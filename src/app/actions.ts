@@ -303,20 +303,6 @@ export async function acknowledgeRequestAction(formData: FormData) {
   redirect('/dashboard/autorizador')
 }
 
-export async function archiveRequestAction(formData: FormData) {
-  const user = await getCurrentUser()
-  if (!user || user.role !== 'SOLICITANTE') return { error: 'Não autorizado' }
-
-  const id = formData.get('id') as string
-  if (!id) return { error: 'ID inválido' }
-
-  await prisma.purchaseRequest.update({
-    where: { id, requesterId: user.id },
-    data: { currentStatus: 'ARQUIVADA' }
-  })
-  
-  revalidatePath('/dashboard/solicitante')
-}
 
 export async function approveFromFinanceAction(formData: FormData) {
   const user = await getCurrentUser()
@@ -488,4 +474,46 @@ export async function deleteRequestAction(formData: FormData) {
     revalidatePath('/dashboard/comprador')
     revalidatePath('/dashboard/autorizador')
   }
+}
+
+export async function markAsDeliveredAction(formData: FormData) {
+  const user = await getCurrentUser()
+  if (!user) return { error: 'Não autorizado' }
+
+  const id = formData.get('id') as string
+  const request = await prisma.purchaseRequest.findUnique({ where: { id } })
+  if (!request) return { error: 'Pedido não encontrado' }
+
+  await prisma.purchaseRequest.update({
+    where: { id },
+    data: {
+      currentStatus: 'ENTREGUE',
+      history: {
+        create: {
+          previousStatus: request.currentStatus,
+          newStatus: 'ENTREGUE',
+          observation: 'Mercadoria informada com retirada (Entregue)',
+          userId: user.id
+        }
+      }
+    }
+  })
+
+  revalidatePath(`/dashboard/${user.role.toLowerCase()}/pedido/${id}`)
+}
+
+export async function archiveRequestAction(formData: FormData) {
+  const user = await getCurrentUser()
+  if (!user) return { error: 'Não autorizado' }
+
+  const id = formData.get('id') as string
+  const request = await prisma.purchaseRequest.findUnique({ where: { id } })
+  if (!request) return { error: 'Pedido não encontrado' }
+
+  await prisma.purchaseRequest.update({
+    where: { id },
+    data: { archived: true }
+  })
+
+  revalidatePath(`/dashboard/${user.role.toLowerCase()}`)
 }

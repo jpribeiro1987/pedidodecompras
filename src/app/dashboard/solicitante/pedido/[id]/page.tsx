@@ -1,6 +1,6 @@
 import { RequestItemsDisplay } from '@/components/RequestItemsDisplay'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/app/actions'
+import { getCurrentUser, deleteRequestAction, markAsDeliveredAction, archiveRequestAction } from '@/app/actions'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AttachmentViewer } from '@/components/AttachmentViewer'
@@ -52,6 +52,34 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
           Voltar
         </Link>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Detalhes da Solicitação</h1>
+        
+        {request.currentStatus === 'CRIADA' && (
+          <form action={deleteRequestAction}>
+            <input type="hidden" name="id" value={request.id} />
+            <button type="submit" className="btn" style={{ backgroundColor: '#ef4444', color: '#fff', fontSize: '0.875rem' }} onClick={(e) => { if(!confirm('Tem certeza que deseja excluir permanentemente este pedido?')) e.preventDefault() }}>
+              Excluir Pedido
+            </button>
+          </form>
+        )}
+        
+        {request.currentStatus === 'APROVADA' && (
+          <form action={markAsDeliveredAction}>
+            <input type="hidden" name="id" value={request.id} />
+            <button type="submit" className="btn" style={{ backgroundColor: '#10b981', color: '#fff', fontSize: '0.875rem' }} onClick={(e) => { if(!confirm('Confirmar retirada desta mercadoria?')) e.preventDefault() }}>
+              Confirmar Retirada
+            </button>
+          </form>
+        )}
+
+        {request.currentStatus === 'ENTREGUE' && (
+          <form action={archiveRequestAction}>
+            <input type="hidden" name="id" value={request.id} />
+            <button type="submit" className="btn" style={{ backgroundColor: '#64748b', color: '#fff', fontSize: '0.875rem' }} onClick={(e) => { if(!confirm('Deseja ocultar este pedido de sua lista principal?')) e.preventDefault() }}>
+              Ocultar (Arquivar)
+            </button>
+          </form>
+        )}
+
         <span style={{ 
           marginLeft: 'auto',
           padding: '0.25rem 0.75rem', 
