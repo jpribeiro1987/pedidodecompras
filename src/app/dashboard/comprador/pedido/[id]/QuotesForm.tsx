@@ -161,6 +161,17 @@ export function QuotesForm({ requestId, suppliers = [], autoApproveLimit = 0, cr
                   style={{ width: '1.2rem', height: '1.2rem', cursor: 'pointer' }}
                 />
               </div>
+            <div style={{ flex: 1, minWidth: '100px' }}>
+              <label>Frete (R$)</label>
+              <input 
+                type="number" step="0.01" min="0" 
+                name={`quote_${index}_freight`}
+                className="input-field" style={{ width: '100%' }} 
+                value={quote.freight} 
+                onChange={e => handleQuoteChange(index, 'freight', e.target.value)} 
+              />
+            </div>
+
               {quotes.length > 1 ? (
                 <button type="button" onClick={() => removeQuote(index)} style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer', fontWeight: 'bold' }}>
                   X
