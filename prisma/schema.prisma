@@ -15,7 +15,8 @@ model SystemConfig {
 model Department {
   id    String @id @default(uuid())
   name  String
-  users User[]
+  users            User[]            @relation("UserPrimaryDepartment")
+  additionalUsers  User[]            @relation("UserAdditionalDepartments")
   requests PurchaseRequest[]
 }
 
@@ -41,7 +42,8 @@ model User {
   password         String            // Hashed in real app
   role             String            // SOLICITANTE, COMPRADOR, AUTORIZADOR, ADMIN
   departmentId     String?
-  department       Department?       @relation(fields: [departmentId], references: [id])
+  department       Department?       @relation(name: "UserPrimaryDepartment", fields: [departmentId], references: [id])
+  additionalDepartments Department[] @relation("UserAdditionalDepartments")
   autoApproveLimit Float?            // Limite de alçada exclusivo para COMPRADOR
   requests         PurchaseRequest[] @relation("Requester")
   requestsAssigned PurchaseRequest[] @relation("AssignedBuyer")

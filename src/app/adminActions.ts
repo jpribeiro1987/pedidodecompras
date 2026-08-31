@@ -35,6 +35,7 @@ export async function createUserAction(formData: FormData) {
   const password = formData.get('password') as string
   const role = formData.get('role') as string
   const departmentId = formData.get('departmentId') as string
+  const additionalDepartments = formData.getAll('additionalDepartments') as string[]
   const autoApproveLimitRaw = formData.get('autoApproveLimit') as string
 
   if (!name || !email || !password || !role) {
@@ -57,6 +58,9 @@ export async function createUserAction(formData: FormData) {
       password,
       role,
       departmentId: departmentId || null,
+      additionalDepartments: {
+        connect: additionalDepartments.filter(id => id !== '').map(id => ({ id }))
+      },
       autoApproveLimit
     }
   })
@@ -74,6 +78,7 @@ export async function updateUserAction(formData: FormData) {
   const password = formData.get('password') as string
   const role = formData.get('role') as string
   const departmentId = formData.get('departmentId') as string
+  const additionalDepartments = formData.getAll('additionalDepartments') as string[]
   const autoApproveLimitRaw = formData.get('autoApproveLimit') as string
 
   if (!id || !name || !email || !role) {
@@ -94,6 +99,9 @@ export async function updateUserAction(formData: FormData) {
     email,
     role,
     departmentId: departmentId || null,
+    additionalDepartments: {
+      set: additionalDepartments.filter(id => id !== '').map(id => ({ id }))
+    },
     autoApproveLimit
   }
 

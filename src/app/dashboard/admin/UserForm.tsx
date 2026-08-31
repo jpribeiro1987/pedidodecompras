@@ -50,6 +50,20 @@ export function UserForm({ departments }: { departments: { id: string, name: str
           ))}
         </select>
       </div>
+      <div style={{ flex: '1 1 200px' }}>
+        <label htmlFor="additionalDepartments">Setores Adicionais (Segure Ctrl para vários)</label>
+        <select 
+          id="additionalDepartments" 
+          name="additionalDepartments" 
+          className="input-field" 
+          multiple
+          size={3}
+        >
+          {departments.map(d => (
+            <option key={d.id} value={d.id}>{d.name}</option>
+          ))}
+        </select>
+      </div>
       {role === 'COMPRADOR' && (
         <div style={{ flex: '1 1 150px' }}>
           <label htmlFor="autoApproveLimit">Limite Aprovação Automática (R$)</label>

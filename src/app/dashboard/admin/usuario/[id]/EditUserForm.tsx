@@ -68,6 +68,21 @@ export function EditUserForm({
             ))}
           </select>
         </div>
+        <div>
+          <label htmlFor="additionalDepartments">Setores Adicionais (Segure Ctrl para vários)</label>
+          <select 
+            id="additionalDepartments" 
+            name="additionalDepartments" 
+            className="input-field" 
+            multiple
+            size={3}
+            defaultValue={user.additionalDepartments?.map((d: any) => d.id) || []}
+          >
+            {departments.map(d => (
+              <option key={d.id} value={d.id}>{d.name}</option>
+            ))}
+          </select>
+        </div>
 
         {role === 'COMPRADOR' && (
           <div>

@@ -58,7 +58,7 @@ export async function getCurrentUser() {
 
   return await prisma.user.findUnique({
     where: { id: userId },
-    include: { department: true }
+    include: { department: true, additionalDepartments: true }
   })
 }
 export async function createRequestAction(formData: FormData) {

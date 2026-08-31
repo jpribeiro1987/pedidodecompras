@@ -8,7 +8,21 @@ export default async function NovaSolicitacaoPage() {
   if (!user || (user.role !== 'SOLICITANTE' && user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return null
   
   const groups = await prisma.purchaseGroup.findMany({ orderBy: { name: 'asc' } })
-  const departments = await prisma.department.findMany({ orderBy: { name: 'asc' } })
+  let departments: any[] = []
+  if (user.role === 'ADMIN' || user.role === 'AUTORIZADOR' || user.role === 'COMPRADOR') {
+    departments = await prisma.department.findMany({ orderBy: { name: 'asc' } })
+  } else {
+    // Solicitante vê apenas seus próprios setores
+    if (user.department) departments.push(user.department)
+    if (user.additionalDepartments) {
+      user.additionalDepartments.forEach((d: any) => {
+        if (!departments.find((existing: any) => existing.id === d.id)) {
+          departments.push(d)
+        }
+      })
+    }
+    departments.sort((a, b) => a.name.localeCompare(b.name))
+  }
   
   let targetUsers: any[] = []
   if (user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR') {
