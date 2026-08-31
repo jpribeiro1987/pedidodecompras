@@ -87,7 +87,8 @@ export function QuotesForm({ requestId, suppliers = [], autoApproveLimit = 0, cr
           </div>
 
           {quotes.map((quote, index) => (
-            <div key={index} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto auto', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <div key={index} style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: index < quotes.length - 1 ? '1px dashed var(--border)' : 'none' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto auto', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
               <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
                 <input 
                   type="text"
@@ -161,23 +162,25 @@ export function QuotesForm({ requestId, suppliers = [], autoApproveLimit = 0, cr
                   style={{ width: '1.2rem', height: '1.2rem', cursor: 'pointer' }}
                 />
               </div>
-            <div style={{ flex: 1, minWidth: '100px' }}>
-              <label>Frete (R$)</label>
-              <input 
-                type="number" step="0.01" min="0" 
-                name={`quote_${index}_freight`}
-                className="input-field" style={{ width: '100%' }} 
-                value={quote.freight} 
-                onChange={e => handleQuoteChange(index, 'freight', e.target.value)} 
-              />
-            </div>
+
 
               {quotes.length > 1 ? (
                 <button type="button" onClick={() => removeQuote(index)} style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer', fontWeight: 'bold' }}>
                   X
                 </button>
-              ) : <div style={{ width: '15px' }}></div>}
+                            ) : <div style={{ width: '15px' }}></div>}
             </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: '0.5rem', paddingLeft: '0.25rem' }}>
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#64748b' }}>Frete (R$):</label>
+              <input 
+                type="number" step="0.01" min="0" 
+                name={`quote_${index}_freight`}
+                className="input-field" style={{ width: '150px', margin: 0 }} 
+                value={quote.freight} 
+                onChange={e => handleQuoteChange(index, 'freight', e.target.value)} 
+              />
+            </div>
+          </div>
           ))}
 
           <div style={{ marginTop: '0.5rem' }}>
