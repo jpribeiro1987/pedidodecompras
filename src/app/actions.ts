@@ -9,7 +9,7 @@ import { join } from 'path'
 
 export async function loginAction(formData: FormData) {
   const rawEmail = formData.get('email') as string
-  const password = formData.get('password') as string
+  const password = (formData.get('password') as string)?.trim()
 
   if (!rawEmail || !password) {
     return { error: 'E-mail e senha são obrigatórios' }
@@ -29,7 +29,8 @@ export async function loginAction(formData: FormData) {
   cookieStore.set('userId', user.id, {
     httpOnly: true,
     secure: false,
-    maxAge: 60 * 60 * 24 * 7 // 1 week
+    maxAge: 60 * 60 * 24 * 7, // 1 week
+    path: '/'
   })
 
   // Redirect based on role
