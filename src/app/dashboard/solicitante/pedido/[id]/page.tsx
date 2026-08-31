@@ -118,7 +118,7 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
                         <div><strong>Prioridade:</strong> {req.priority || 'Não definida'}</div>
                         {reqItem.link && (
                           <div style={{ gridColumn: '1 / -1' }}>
-                            <strong>Link:</strong> <a href={reqItem.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Acessar</a>
+                            <strong>Link:</strong> <a href={reqItem.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', wordBreak: 'break-all' }}>Acessar</a>
                           </div>
                         )}
                         {reqItem.imageUrl && (

@@ -93,7 +93,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
               {request.link && (
                 <div style={{ gridColumn: '1 / -1' }}>
                   <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Link de Referência</p>
-                  <a href={request.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>
+                  <a href={request.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline', wordBreak: 'break-all' }}>
                     {request.link}
                   </a>
                 </div>
