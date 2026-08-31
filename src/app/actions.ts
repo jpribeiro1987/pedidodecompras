@@ -63,10 +63,11 @@ export async function getCurrentUser() {
 }
 export async function createRequestAction(formData: FormData) {
   const user = await getCurrentUser()
-  if (!user || (user.role !== 'SOLICITANTE' && user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return { error: 'Não autorizado' }
+  if (!user || (user.role !== 'SOLICITANTE' && user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return { error: 'No autorizado' }
 
   const justification = formData.get('justification') as string
   let targetRequesterId = user.id
+  let departmentId = formData.get('departmentId') as string || user.departmentId
 
   if (user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR') {
     const overrideId = formData.get('requesterId') as string
@@ -108,6 +109,7 @@ export async function createRequestAction(formData: FormData) {
           priority: item.priority || 'MEDIA',
           classification: item.classification || 'Consumo',
           ...(item.groupId ? { group: { connect: { id: item.groupId } } } : {}),
+          department: departmentId ? { connect: { id: departmentId } } : undefined,
           requester: { connect: { id: targetRequesterId } },
           items: {
             create: [{
@@ -380,16 +382,44 @@ export async function assignBuyerAction(formData: FormData) {
   if (isBatch) {
     const request = await prisma.purchaseRequest.findUnique({ where: { id } })
     if (request?.batchId) {
-      await prisma.purchaseRequest.updateMany({
-        where: { batchId: request.batchId },
-        data: { buyerId: user.id }
-      })
+      const requestsInBatch = await prisma.purchaseRequest.findMany({ where: { batchId: request.batchId } })
+      for (const req of requestsInBatch) {
+        if (req.currentStatus === 'CRIADA') {
+          await prisma.purchaseRequest.update({
+            where: { id: req.id },
+            data: { 
+              buyerId: user.id, 
+              currentStatus: 'EM_COTACAO',
+              history: { create: { previousStatus: req.currentStatus, newStatus: 'EM_COTACAO', observation: 'Comprador assumiu o pedido e iniciou cotação', userId: user.id } }
+            }
+          })
+        } else {
+          await prisma.purchaseRequest.update({
+            where: { id: req.id },
+            data: { buyerId: user.id }
+          })
+        }
+      }
     }
   } else {
-    await prisma.purchaseRequest.update({
-      where: { id },
-      data: { buyerId: user.id }
-    })
+    const req = await prisma.purchaseRequest.findUnique({ where: { id } })
+    if (req) {
+      if (req.currentStatus === 'CRIADA') {
+        await prisma.purchaseRequest.update({
+          where: { id },
+          data: { 
+            buyerId: user.id,
+            currentStatus: 'EM_COTACAO',
+            history: { create: { previousStatus: req.currentStatus, newStatus: 'EM_COTACAO', observation: 'Comprador assumiu o pedido e iniciou cotação', userId: user.id } }
+          }
+        })
+      } else {
+        await prisma.purchaseRequest.update({
+          where: { id },
+          data: { buyerId: user.id }
+        })
+      }
+    }
   }
 
   revalidatePath('/dashboard/comprador')
@@ -421,4 +451,41 @@ export async function transferBuyerAction(formData: FormData) {
   }
 
   revalidatePath('/dashboard/comprador')
+}
+
+export async function deleteRequestAction(formData: FormData) {
+  const user = await getCurrentUser()
+  if (!user) return { error: 'Não autorizado' }
+
+  const id = formData.get('id') as string
+  const request = await prisma.purchaseRequest.findUnique({ 
+    where: { id },
+    include: { items: true, requester: true }
+  })
+  if (!request) return { error: 'Pedido não encontrado' }
+
+  if (user.role === 'SOLICITANTE' && (request.requesterId !== user.id || request.currentStatus !== 'CRIADA')) {
+    return { error: 'Você só pode excluir seus próprios pedidos e que estejam com status Novos (CRIADA).' }
+  }
+
+
+  // Deixar log de exclusão
+  const itemsDesc = request.items.map(i => i.description).join(', ')
+  await prisma.deletionLog.create({
+    data: {
+      requestId: request.id,
+      description: request.description || itemsDesc,
+      requesterId: request.requesterId,
+      deletedBy: user.name + ' (' + user.role + ')'
+    }
+  })
+
+  await prisma.purchaseRequest.delete({ where: { id } })
+
+  if (user.role === 'SOLICITANTE') {
+    revalidatePath('/dashboard/solicitante')
+  } else {
+    revalidatePath('/dashboard/comprador')
+    revalidatePath('/dashboard/autorizador')
+  }
 }

@@ -16,6 +16,7 @@ model Department {
   id    String @id @default(uuid())
   name  String
   users User[]
+  requests PurchaseRequest[]
 }
 
 model Supplier {
@@ -73,6 +74,9 @@ model PurchaseRequest {
 
   requesterId        String
   requester          User            @relation("Requester", fields: [requesterId], references: [id])
+
+  departmentId       String?
+  department         Department?     @relation(fields: [departmentId], references: [id])
 
   buyerId            String?
   buyer              User?           @relation("AssignedBuyer", fields: [buyerId], references: [id])
@@ -145,4 +149,13 @@ model PurchaseItem {
   
   requestId   String
   request     PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model DeletionLog {
+  id           String   @id @default(uuid())
+  requestId    String   // Store just the ID since the actual request might be deleted
+  description  String?
+  requesterId  String?
+  deletedBy    String
+  deletedAt    DateTime @default(now())
 }

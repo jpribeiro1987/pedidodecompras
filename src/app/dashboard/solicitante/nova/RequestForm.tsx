@@ -276,6 +276,16 @@ export function RequestForm({
         </button>
       </div>
 
+            <div style={{ marginBottom: '1.5rem' }}>
+        <label htmlFor="departmentId">Setor Solicitante (Opcional - Padrão: Seu Setor)</label>
+        <select id="departmentId" name="departmentId" className="input-field" defaultValue={user.departmentId || ''}>
+          <option value="">Selecione um setor...</option>
+          {departments.map(d => (
+            <option key={d.id} value={d.id}>{d.name}</option>
+          ))}
+        </select>
+      </div>
+      
       <div style={{ marginBottom: '1.5rem' }}>
         <label htmlFor="justification">Qual a justificativa global da compra? *</label>
         <textarea 

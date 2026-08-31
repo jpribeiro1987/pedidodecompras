@@ -8,6 +8,7 @@ export default async function NovaSolicitacaoPage() {
   if (!user || (user.role !== 'SOLICITANTE' && user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return null
   
   const groups = await prisma.purchaseGroup.findMany({ orderBy: { name: 'asc' } })
+  const departments = await prisma.department.findMany({ orderBy: { name: 'asc' } })
   
   let targetUsers: any[] = []
   if (user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR') {
