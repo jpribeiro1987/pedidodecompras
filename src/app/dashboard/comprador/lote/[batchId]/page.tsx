@@ -22,7 +22,7 @@ export default async function LoteCompradorPage({ params }: { params: Promise<{ 
   })
 
   const allBuyers = await prisma.user.findMany({
-    where: { role: 'COMPRADOR' }
+    where: { role: { in: ['COMPRADOR', 'AUTORIZADOR', 'ADMIN'] } }
   })
 
   if (requests.length === 0) {

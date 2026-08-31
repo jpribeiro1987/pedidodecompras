@@ -20,7 +20,7 @@ export default async function CompradorDashboard() {
   })
 
   const allBuyers = await prisma.user.findMany({
-    where: { role: 'COMPRADOR' }
+    where: { role: { in: ['COMPRADOR', 'AUTORIZADOR', 'ADMIN'] } }
   })
 
   return (
