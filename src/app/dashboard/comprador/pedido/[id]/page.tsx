@@ -18,6 +18,8 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
     include: {
       requester: { include: { department: true } },
       attachments: true,
+      items: true,
+      quotes: true,
       history: {
         include: { user: true },
         orderBy: { date: 'desc' }
@@ -84,11 +86,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                 </div>
               )}
               <div style={{ gridColumn: '1 / -1' }}>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Descrição Principal</p>
-                <p style={{ fontWeight: 500 }}>
-                  {request.items && request.items.length > 0 ? request.items[0].description : request.description} 
-                  (Qtd: {request.items && request.items.length > 0 ? request.items[0].quantity : request.quantity})
-                </p>
+                <RequestItemsDisplay request={request} />
               </div>
               {request.link && (
                 <div style={{ gridColumn: '1 / -1' }}>
