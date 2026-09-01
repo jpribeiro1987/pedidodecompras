@@ -98,7 +98,7 @@ export function EditRequestForm({
           }
         })
         
-        const res = await createRequestAction(formData)
+        const res = await updateRequestAction(formData)
         
         if (res?.error) {
           setErrorMsg(res.error)
