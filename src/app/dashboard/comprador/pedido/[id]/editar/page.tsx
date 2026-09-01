@@ -36,11 +36,11 @@ export default async function EditarPedidoPage({ params }: { params: Promise<{ i
     <div style={{ padding: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '2rem' }}>Editar Solicitação #{request.id.slice(0,8)}</h1>
       <EditRequestForm 
-        user={user} 
-        departments={departments} 
-        targetUsers={targetUsers as any} 
-        groups={groups}
-        request={request}
+        user={JSON.parse(JSON.stringify(user))} 
+        departments={JSON.parse(JSON.stringify(departments))} 
+        targetUsers={JSON.parse(JSON.stringify(targetUsers)) as any} 
+        groups={JSON.parse(JSON.stringify(groups))}
+        request={JSON.parse(JSON.stringify(request))}
       />
     </div>
   )
