@@ -2,6 +2,8 @@ import { RequestItemsDisplay } from '@/components/RequestItemsDisplay'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/app/actions'
 import Link from 'next/link'
+import { ConfirmButton } from '@/components/ConfirmButton'
+import { deleteRequestAction } from '@/app/actions'
 import { notFound } from 'next/navigation'
 import { QuotesForm } from './QuotesForm'
 import { ExtendDeliveryForm } from './ExtendDeliveryForm'
@@ -49,6 +51,21 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
           Voltar
         </Link>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Análise de Solicitação</h1>
+        
+        {request.currentStatus !== 'ENTREGUE' && request.currentStatus !== 'CANCELADA' && (
+          <>
+            <Link href={`/dashboard/${'comprador'}/pedido/${request.id}/editar`} className="btn" style={{ backgroundColor: '#3b82f6', color: '#fff', fontSize: '0.875rem', textDecoration: 'none', textAlign: 'center' }}>
+              Editar Pedido
+            </Link>
+            <form action={deleteRequestAction}>
+              <input type="hidden" name="id" value={request.id} />
+              <ConfirmButton message="Tem certeza que deseja excluir permanentemente este pedido?" className="btn" style={{ backgroundColor: '#ef4444', color: '#fff', fontSize: '0.875rem' }}>
+                Excluir Pedido
+              </ConfirmButton>
+            </form>
+          </>
+        )}
+
         <span style={{ 
           marginLeft: 'auto',
           padding: '0.25rem 0.75rem', 

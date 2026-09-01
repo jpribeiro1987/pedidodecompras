@@ -453,6 +453,9 @@ export async function deleteRequestAction(formData: FormData) {
 
   if (user.role === 'SOLICITANTE' && (request.requesterId !== user.id || request.currentStatus !== 'CRIADA')) {
     return { error: 'Você só pode excluir seus próprios pedidos e que estejam com status Novos (CRIADA).' }
+  if ((user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR') && (request.currentStatus === 'ENTREGUE' || request.currentStatus === 'CANCELADA')) {
+    return { error: 'Não é possível excluir pedidos finalizados.' }
+  }
   }
 
 
@@ -517,4 +520,76 @@ export async function archiveRequestAction(formData: FormData) {
   })
 
   revalidatePath(`/dashboard/${user.role.toLowerCase()}`)
+}
+
+export async function updateRequestAction(formData: FormData) {
+  const user = await getCurrentUser()
+  if (!user || (user.role !== 'SOLICITANTE' && user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) {
+    return { error: 'Não autorizado' }
+  }
+
+  const id = formData.get('id') as string
+  const request = await prisma.purchaseRequest.findUnique({ where: { id }, include: { items: true } })
+  if (!request) return { error: 'Pedido não encontrado' }
+
+  if (user.role === 'SOLICITANTE' && (request.requesterId !== user.id || request.currentStatus !== 'CRIADA')) {
+    return { error: 'Você só pode editar seus próprios pedidos e que estejam com status Novos (CRIADA).' }
+  }
+  
+  if ((user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR') && (request.currentStatus === 'ENTREGUE' || request.currentStatus === 'CANCELADA')) {
+    return { error: 'Não é possível editar pedidos finalizados.' }
+  }
+
+  const justification = formData.get('justification') as string
+  const departmentId = formData.get('departmentId') as string | null
+  const deliveryDateStr = formData.get('deliveryDate') as string | null
+  const itemsJson = formData.get('items') as string
+  
+  let parsedItems = []
+  try {
+    if (itemsJson) parsedItems = JSON.parse(itemsJson)
+  } catch(e) {}
+
+  let deliveryDate = null
+  if (deliveryDateStr) {
+    deliveryDate = new Date(deliveryDateStr)
+  }
+
+  // Deletar os itens antigos e criar os novos
+  await prisma.purchaseItem.deleteMany({ where: { purchaseRequestId: id } })
+
+  await prisma.purchaseRequest.update({
+    where: { id },
+    data: {
+      justification,
+      departmentId: departmentId || undefined,
+      deliveryDate,
+      items: {
+        create: parsedItems.map((item: any) => ({
+          description: item.description,
+          quantity: item.quantity ? parseInt(item.quantity) : null,
+          priority: item.priority || null,
+          link: item.link || null,
+          imageUrl: item.imageUrl || null
+        }))
+      }
+    }
+  })
+
+  // Registrar histórico
+  await prisma.statusHistory.create({
+    data: {
+      newStatus: request.currentStatus,
+      observation: 'Pedido editado',
+      purchaseRequestId: id,
+      userId: user.id
+    }
+  })
+
+  revalidatePath('/dashboard/solicitante')
+  revalidatePath('/dashboard/comprador')
+  revalidatePath('/dashboard/autorizador')
+  revalidatePath('/dashboard/solicitante/pedido/' + id)
+  
+  return { success: true }
 }

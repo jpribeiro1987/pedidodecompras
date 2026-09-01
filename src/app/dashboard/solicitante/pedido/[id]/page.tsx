@@ -56,12 +56,15 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Detalhes da Solicitação</h1>
         
         {request.currentStatus === 'CRIADA' && (
+          <>
+          <Link href={`/dashboard/solicitante/pedido/${request.id}/editar`} className="btn" style={{ backgroundColor: '#3b82f6', color: '#fff', fontSize: '0.875rem', textDecoration: 'none', textAlign: 'center' }}>Editar Pedido</Link>
           <form action={deleteRequestAction}>
             <input type="hidden" name="id" value={request.id} />
             <ConfirmButton>
               
             </ConfirmButton>
           </form>
+          </>
         )}
         
         {request.currentStatus === 'APROVADA' && (
