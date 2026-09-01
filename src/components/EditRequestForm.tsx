@@ -9,16 +9,18 @@ export function EditRequestForm({
   groups, 
   targetUsers, 
   isComprador,
-  departments = []
-}: { 
+  departments = [],
+  request
+}: {
   user: any,
-  groups: any[], 
-  targetUsers?: any[], 
+  groups: any[],
+  targetUsers?: any[],
   isComprador?: boolean,
-  departments?: any[]
+  departments?: any[],
+  request: any
 }) {
   const router = useRouter()
-  const [items, setItems] = useState([{ 
+  const [items, setItems] = useState(request.items && request.items.length > 0 ? request.items.map((i) => ({ ...i, quantity: String(i.quantity), file: null, previewUrl: i.imageUrl || "" })) : [{ 
     description: '', 
     quantity: 1, 
     link: '',
