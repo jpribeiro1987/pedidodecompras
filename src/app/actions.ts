@@ -588,10 +588,10 @@ export async function updateRequestAction(formData: FormData) {
     }
   })
 
-  revalidatePath('/dashboard/solicitante')
-  revalidatePath('/dashboard/comprador')
-  revalidatePath('/dashboard/autorizador')
-  revalidatePath('/dashboard/solicitante/pedido/' + id)
+  // revalidatePath('/dashboard/solicitante')
+  // revalidatePath('/dashboard/comprador')
+  // revalidatePath('/dashboard/autorizador')
+  // revalidatePath('/dashboard/solicitante/pedido/' + id)
   
   return { success: true, redirectUrl: '/dashboard/' + (user.role === 'COMPRADOR' ? 'comprador' : user.role === 'AUTORIZADOR' ? 'autorizador' : 'solicitante') + '/pedido/' + id }
 }
