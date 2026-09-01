@@ -81,7 +81,9 @@ export function EditRequestForm({
   }
 
   return (
-    <form action={async (formData) => {
+    <form onSubmit={async (e) => {
+      e.preventDefault()
+      const formData = new FormData(e.currentTarget)
       setLoading(true)
       setErrorMsg('')
       try {
