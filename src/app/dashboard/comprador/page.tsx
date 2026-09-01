@@ -8,14 +8,19 @@ export default async function CompradorDashboard() {
   if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) return null
 
   const whereClause: any = {
-    currentStatus: {
-      in: ['CRIADA', 'EM_ANALISE', 'EM_COTACAO', 'DEVOLVIDO', 'AGUARDANDO_FINANCEIRO', 'APROVADA', 'RECUSADA']
-    }
+    OR: [
+      {
+        currentStatus: {
+          in: ['CRIADA', 'EM_ANALISE', 'EM_COTACAO', 'DEVOLVIDO', 'AGUARDANDO_FINANCEIRO', 'APROVADA', 'RECUSADA']
+        }
+      },
+      { currentStatus: 'DISPONIVEL_RETIRADA' }
+    ]
   }
 
   const requests = await prisma.purchaseRequest.findMany({
     where: whereClause,
-    orderBy: { createdAt: 'asc' },
+    orderBy: { createdAt: 'desc' },
     include: { requester: true, items: true, buyer: true }
   })
 
@@ -63,7 +68,7 @@ export default async function CompradorDashboard() {
                 map.forEach((reqs, batchId) => {
                   grouped.push({ isBatch: true, batchId, requests: reqs })
                 })
-                grouped.sort((a, b) => new Date(a.requests[0].createdAt).getTime() - new Date(b.requests[0].createdAt).getTime())
+                grouped.sort((a, b) => new Date(b.requests[0].createdAt).getTime() - new Date(a.requests[0].createdAt).getTime())
                 
                 return grouped.map(group => {
                   const req = group.requests[0]

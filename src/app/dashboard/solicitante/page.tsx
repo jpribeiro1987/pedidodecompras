@@ -18,7 +18,8 @@ export default async function SolicitanteDashboard() {
     { id: 'novas', title: 'Novas / Análise', statuses: ['CRIADA', 'EM_ANALISE'], color: '#e2e8f0', borderColor: '#cbd5e1' },
     { id: 'cotacao', title: 'Em Cotação', statuses: ['EM_COTACAO'], color: '#fef08a', borderColor: '#fde047' },
     { id: 'autorizacao', title: 'Aguard. Aprovação', statuses: ['AGUARDANDO_AUTORIZACAO', 'AGUARDANDO_FINANCEIRO'], color: '#fed7aa', borderColor: '#fdba74' },
-    { id: 'concluidas', title: 'Concluídas', statuses: ['APROVADA', 'DISPONIVEL_RETIRADA', 'REJEITADA', 'RECUSADA'], color: '#bbf7d0', borderColor: '#86efac' },
+    { id: 'concluidas', title: 'Concluídas', statuses: ['APROVADA', 'REJEITADA', 'RECUSADA'], color: '#bbf7d0', borderColor: '#86efac' },
+    { id: 'disponiveis', title: 'Disponível Retirada', statuses: ['DISPONIVEL_RETIRADA'], color: '#bfdbfe', borderColor: '#93c5fd' },
   ]
 
   const getStatusBadge = (status: string) => {
@@ -145,7 +146,7 @@ export default async function SolicitanteDashboard() {
                             </div>
                           </div>
                         </Link>
-                        {col.id === 'concluidas' && (
+                        {(col.id === 'concluidas' || col.id === 'disponiveis') && (
                           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                             {group.requests.map((req: any, idx: number) => (
                               <form key={req.id} action={archiveRequestAction} style={{ flex: 1 }}>
