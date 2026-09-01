@@ -105,8 +105,8 @@ export function EditRequestForm({
         if (res?.error) {
           setErrorMsg(res.error)
           setLoading(false)
-        } else if (res?.success && res.redirectUrl) {
-          router.push(res.redirectUrl)
+        } else if (res?.success) {
+          router.push(`/dashboard/solicitante/pedido/${request.id}`)
         }
       } catch (err: any) {
         setErrorMsg(err.message || 'Erro crítico')
