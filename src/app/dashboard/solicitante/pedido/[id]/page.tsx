@@ -6,7 +6,8 @@ import { notFound } from 'next/navigation'
 import { AttachmentViewer } from '@/components/AttachmentViewer'
 
 export default async function PedidoDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await getCurrentUser()
+  try {
+    const user = await getCurrentUser()
   if (!user) return null
   
   const { id } = await params
@@ -201,4 +202,17 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
       </div>
     </div>
   )
+
+  } catch (error: any) {
+    return (
+      <div style={{ padding: '2rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', margin: '2rem' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1rem' }}>Erro Interno (Renderização Servidor)</h2>
+        <div style={{ backgroundColor: '#fff', padding: '1rem', borderRadius: '4px', textAlign: 'left', fontFamily: 'monospace', overflowX: 'auto', color: '#000' }}>
+          <strong>Message:</strong> {error?.message || String(error)}
+          <br/><br/>
+          <strong>Stack:</strong> <pre style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>{error?.stack || 'No stack'}</pre>
+        </div>
+      </div>
+    )
+  }
 }
