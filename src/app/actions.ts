@@ -52,7 +52,15 @@ export async function logoutAction() {
 }
 
 export async function getCurrentUser() {
-  return { id: "mock-id", role: "SOLICITANTE", name: "Mock User", departmentId: "mock-dept" };
+  const cookieStore = await cookies()
+  const userId = cookieStore.get('userId')?.value
+
+  if (!userId) return null
+
+  return await prisma.user.findUnique({
+    where: { id: userId },
+    include: { department: true, additionalDepartments: true }
+  })
 }
 export async function createRequestAction(formData: FormData) {
   const user = await getCurrentUser()
