@@ -106,7 +106,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
             {request.attachments && request.attachments.length > 0 && (
               <div style={{ marginTop: '1.5rem' }}>
                 <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500, marginBottom: '0.5rem' }}>Anexos</p>
-                <AttachmentViewer attachments={request.attachments} />
+                <AttachmentViewer attachments={request.attachments.map((a: any) => ({ id: a.id, name: a.name, url: a.url }))} />
               </div>
             )}
           </div>
@@ -153,7 +153,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                 )}
               </>
             ) : ['CRIADA', 'EM_COTACAO', 'AGUARDANDO_AUTORIZACAO'].includes(request.currentStatus) ? (
-              <QuotesForm requestId={request.id} suppliers={suppliers} autoApproveLimit={autoApproveLimit} criteriaList={criteriaList} />
+              <QuotesForm requestId={request.id} suppliers={suppliers.map((s: any) => ({ id: s.id, name: s.name, cnpj: s.cnpj }))} autoApproveLimit={autoApproveLimit} criteriaList={criteriaList} />
             ) : null}
 
             {['CRIADA', 'EM_COTACAO', 'AGUARDANDO_AUTORIZACAO', 'AGUARDANDO_FINANCEIRO'].includes(request.currentStatus) && (
