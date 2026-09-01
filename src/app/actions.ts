@@ -478,6 +478,8 @@ export async function deleteRequestAction(formData: FormData) {
     revalidatePath('/dashboard/comprador')
     revalidatePath('/dashboard/autorizador')
   }
+  
+  redirect('/dashboard/' + (user.role === 'COMPRADOR' ? 'comprador' : user.role === 'AUTORIZADOR' ? 'autorizador' : 'solicitante'))
 }
 
 export async function markAsDeliveredAction(formData: FormData) {
