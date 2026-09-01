@@ -166,7 +166,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                 </form>
 
                 {request.deliveryDate && (
-                  <ExtendDeliveryForm requestId={request.id} currentDeliveryDate={request.deliveryDate} />
+                  <ExtendDeliveryForm requestId={request.id} currentDeliveryDate={request.deliveryDate ? request.deliveryDate.toISOString() : null} />
                 )}
               </>
             ) : ['CRIADA', 'EM_COTACAO', 'AGUARDANDO_AUTORIZACAO'].includes(request.currentStatus) ? (

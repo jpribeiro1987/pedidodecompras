@@ -74,7 +74,7 @@ export default async function AutorizadorPedidoPage({ params }: { params: Promis
             {request.attachments && request.attachments.length > 0 && (
               <div style={{ marginBottom: '1.5rem' }}>
                 <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500, marginBottom: '0.5rem' }}>Anexos do Solicitante</p>
-                <AttachmentViewer attachments={request.attachments} />
+                <AttachmentViewer attachments={request.attachments.map((a: any) => ({ id: a.id, name: a.name, url: a.url }))} />
               </div>
             )}
 
