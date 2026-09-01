@@ -10,7 +10,7 @@ export default async function HistoricoGeralPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const user = await getCurrentUser()
-  if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) return null
+  if (!user) return null
 
   const resolvedSearchParams = await searchParams
   
