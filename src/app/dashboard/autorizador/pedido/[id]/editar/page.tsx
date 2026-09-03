@@ -35,9 +35,9 @@ export default async function EditarPedidoAutorizadorPage({ params }: { params: 
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Editar Solicitação #{request.id.slice(0,8)}</h1>
       </div>
       <SimpleEditForm 
-        departments={departments} 
-        groups={groups}
-        request={request}
+        departments={JSON.parse(JSON.stringify(departments))} 
+        groups={JSON.parse(JSON.stringify(groups))}
+        request={JSON.parse(JSON.stringify(request))}
         role="AUTORIZADOR"
       />
     </div>

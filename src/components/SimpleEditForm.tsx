@@ -148,14 +148,20 @@ export function SimpleEditForm({
         </button>
       </div>
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label htmlFor="departmentId">Setor Solicitante (Opcional)</label>
-        <select id="departmentId" name="departmentId" className="input-field" defaultValue={request.departmentId || ''}>
-          <option value="">Selecione um setor...</option>
-          {departments.map((d: any) => (
-            <option key={d.id} value={d.id}>{d.name}</option>
-          ))}
-        </select>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+        <div>
+          <label htmlFor="departmentId">Setor Solicitante (Opcional)</label>
+          <select id="departmentId" name="departmentId" className="input-field" defaultValue={request.departmentId || ''}>
+            <option value="">Selecione um setor...</option>
+            {departments.map((d: any) => (
+              <option key={d.id} value={d.id}>{d.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="deliveryDate">Previsão de Entrega (Opcional)</label>
+          <input type="date" id="deliveryDate" name="deliveryDate" className="input-field" defaultValue={request.deliveryDate ? request.deliveryDate.split('T')[0] : ''} />
+        </div>
       </div>
       
       <div style={{ marginBottom: '1.5rem' }}>
