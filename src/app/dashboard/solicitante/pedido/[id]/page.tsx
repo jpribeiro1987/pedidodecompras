@@ -57,7 +57,7 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
         
         {request.currentStatus === 'CRIADA' && (
           <>
-          <Link href={`/dashboard/solicitante/pedido/${request.id}/editar`} className="btn" style={{ backgroundColor: '#3b82f6', color: '#fff', fontSize: '0.875rem', textDecoration: 'none', textAlign: 'center' }}>Editar Pedido</Link>
+
           <form action={deleteRequestAction}>
             <input type="hidden" name="id" value={request.id} />
             <ConfirmButton>
