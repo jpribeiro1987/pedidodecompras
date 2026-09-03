@@ -37,6 +37,11 @@ export default async function AutorizadorPedidoPage({ params }: { params: Promis
           Voltar
         </Link>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Avaliação de Solicitação</h1>
+        {request.currentStatus !== 'ENTREGUE' && request.currentStatus !== 'CANCELADA' && (
+          <Link href={`/dashboard/autorizador/pedido/${request.id}/editar`} className="btn" style={{ backgroundColor: '#3b82f6', color: '#fff', fontSize: '0.875rem', textDecoration: 'none', marginLeft: 'auto' }}>
+            Editar Pedido
+          </Link>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>

@@ -54,7 +54,9 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
         
         {request.currentStatus !== 'ENTREGUE' && request.currentStatus !== 'CANCELADA' && (
           <>
-
+            <Link href={`/dashboard/comprador/pedido/${request.id}/editar`} className="btn" style={{ backgroundColor: '#3b82f6', color: '#fff', fontSize: '0.875rem', textDecoration: 'none', textAlign: 'center' }}>
+              Editar Pedido
+            </Link>
             <form action={deleteRequestAction}>
               <input type="hidden" name="id" value={request.id} />
               <ConfirmButton message="Tem certeza que deseja excluir permanentemente este pedido?" className="btn" style={{ backgroundColor: '#ef4444', color: '#fff', fontSize: '0.875rem' }}>
