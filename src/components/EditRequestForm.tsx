@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateRequestAction } from '@/app/actions'
+import { updateRequestAction, updateRequestActionData } from '@/app/actions'
 import { useRouter } from 'next/navigation'
 
 export function EditRequestForm({ 
@@ -91,16 +91,15 @@ export function EditRequestForm({
           const { file, previewUrl, ...rest } = item
           return rest
         })
-        formData.append('items', JSON.stringify(itemsWithoutFiles))
-        formData.append('justification', justification)
+        const data = {
+          id: (formData.get('id') as string) || request.id,
+          justification: justification,
+          itemsJson: JSON.stringify(itemsWithoutFiles),
+          departmentId: (formData.get('departmentId') as string) || undefined,
+          deliveryDateStr: (formData.get('deliveryDate') as string) || undefined
+        }
         
-        items.forEach((item, index) => {
-          if (item.file) {
-            formData.append(`item_image_${index}`, item.file)
-          }
-        })
-        
-        const res = await updateRequestAction(formData)
+        const res = await updateRequestActionData(data)
         
         if (res?.error) {
           setErrorMsg(res.error)
