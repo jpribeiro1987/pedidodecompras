@@ -6,7 +6,7 @@ import { SimpleEditForm } from '@/components/SimpleEditForm'
 
 export default async function EditarPedidoAutorizadorPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'AUTORIZADOR') return null
+  if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return null
 
   const { id } = await params
   const request = await prisma.purchaseRequest.findUnique({
