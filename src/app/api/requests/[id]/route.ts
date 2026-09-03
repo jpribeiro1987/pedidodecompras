@@ -22,7 +22,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     // Update items
-    await prisma.purchaseItem.deleteMany({ where: { purchaseRequestId: id } })
+    await prisma.purchaseItem.deleteMany({ where: { requestId: id } })
 
     const updated = await prisma.purchaseRequest.update({
       where: { id },
@@ -47,7 +47,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       data: {
         newStatus: request.currentStatus,
         observation: 'Pedido editado pela ' + (user.role === 'COMPRADOR' ? 'Compras' : 'Diretoria'),
-        purchaseRequestId: id,
+        requestId: id,
         userId: user.id
       }
     })

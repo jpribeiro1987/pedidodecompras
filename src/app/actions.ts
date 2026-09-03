@@ -558,7 +558,7 @@ export async function updateRequestAction(formData: FormData) {
   }
 
   // Deletar os itens antigos e criar os novos
-  await prisma.purchaseItem.deleteMany({ where: { purchaseRequestId: id } })
+  await prisma.purchaseItem.deleteMany({ where: { requestId: id } })
 
   await prisma.purchaseRequest.update({
     where: { id },
@@ -583,7 +583,7 @@ export async function updateRequestAction(formData: FormData) {
     data: {
       newStatus: request.currentStatus,
       observation: 'Pedido editado',
-      purchaseRequestId: id,
+      requestId: id,
       userId: user.id
     }
   })
@@ -628,7 +628,7 @@ export async function updateRequestActionData(data: { id: string, justification:
     deliveryDate = new Date(deliveryDateStr)
   }
 
-  await prisma.purchaseItem.deleteMany({ where: { purchaseRequestId: id } })
+  await prisma.purchaseItem.deleteMany({ where: { requestId: id } })
 
   await prisma.purchaseRequest.update({
     where: { id },
@@ -652,7 +652,7 @@ export async function updateRequestActionData(data: { id: string, justification:
     data: {
       newStatus: request.currentStatus,
       observation: 'Pedido editado',
-      purchaseRequestId: id,
+      requestId: id,
       userId: user.id
     }
   })
