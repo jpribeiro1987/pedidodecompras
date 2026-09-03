@@ -30,12 +30,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         justification: body.justification,
         departmentId: body.departmentId || undefined,
         deliveryDate: body.deliveryDate ? new Date(body.deliveryDate) : null,
+        priority: body.items[0]?.priority || 'BAIXA',
+        classification: body.items[0]?.classification || 'Consumo',
+        groupId: body.items[0]?.groupId || null,
+        description: body.items[0]?.description || null,
+        quantity: body.items[0]?.quantity ? parseInt(body.items[0].quantity) : null,
+        link: body.items[0]?.link || null,
         items: {
           create: body.items.map((item: any) => ({
             description: item.description,
             quantity: item.quantity ? parseInt(item.quantity) : 1,
-            priority: item.priority || 'BAIXA',
-            classification: item.classification || 'Consumo',
             link: item.link || null,
             imageUrl: item.imageUrl || null
           }))
