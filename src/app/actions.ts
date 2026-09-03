@@ -588,15 +588,18 @@ export async function updateRequestAction(formData: FormData) {
     }
   })
 
+  console.log("updateRequestActionData SUCCESS, revalidating...");
   revalidatePath('/dashboard/solicitante')
   revalidatePath('/dashboard/comprador')
   revalidatePath('/dashboard/autorizador')
   revalidatePath('/dashboard/solicitante/pedido/' + id)
   
+  console.log("updateRequestActionData RETURNING");
   return { success: true }
 }
 
 export async function updateRequestActionData(data: { id: string, justification: string, itemsJson: string, departmentId?: string, deliveryDateStr?: string }) {
+  console.log("updateRequestActionData EXECUTING!", data);
   const user = await getCurrentUser()
   if (!user || (user.role !== 'SOLICITANTE' && user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) {
     return { error: 'Não autorizado' }
