@@ -55,15 +55,17 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
         </Link>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Detalhes da Solicitação</h1>
         
-        {request.currentStatus === 'CRIADA' && (
+        {['CRIADA', 'DEVOLVIDA_AJUSTES'].includes(request.currentStatus) && (
           <>
-
-          <form action={deleteRequestAction}>
-            <input type="hidden" name="id" value={request.id} />
-            <ConfirmButton>
-              
-            </ConfirmButton>
-          </form>
+            <Link href={`/dashboard/solicitante/pedido/${request.id}/editar`} className="btn btn-primary">
+              Editar Pedido
+            </Link>
+            <form action={deleteRequestAction}>
+              <input type="hidden" name="id" value={request.id} />
+              <ConfirmButton>
+                
+              </ConfirmButton>
+            </form>
           </>
         )}
         
