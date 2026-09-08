@@ -14,15 +14,15 @@ export function RequestItemsDisplay({ request }: { request: any }) {
                     Acessar Link de Referência
                   </a>
                 )}
-                {item.imageUrl && (
-                  <div style={{ marginTop: '0.5rem', width: '100%' }}>
-                    <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#10b981', marginBottom: '0.25rem' }}>📷 Imagem Anexada:</p>
-                    <a href={item.imageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
-                      <img src={item.imageUrl} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
-                    </a>
-                  </div>
-                )}
               </div>
+              {item.imageUrl && (
+                <div style={{ marginTop: '0.75rem', width: '100%' }}>
+                  <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#10b981', marginBottom: '0.25rem' }}>📷 Imagem Anexada:</p>
+                  <a href={item.imageUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-block' }}>
+                    <img src={item.imageUrl} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                  </a>
+                </div>
+              )}
             </div>
           ))}
         </div>
