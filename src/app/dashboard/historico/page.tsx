@@ -19,6 +19,7 @@ export default async function HistoricoGeralPage({
   const dateStart = typeof resolvedSearchParams.dateStart === 'string' ? resolvedSearchParams.dateStart : ''
   const dateEnd = typeof resolvedSearchParams.dateEnd === 'string' ? resolvedSearchParams.dateEnd : ''
   const classificationFilter = typeof resolvedSearchParams.classification === 'string' ? resolvedSearchParams.classification : ''
+  const itemFilter = typeof resolvedSearchParams.item === 'string' ? resolvedSearchParams.item : ''
 
   const whereCondition: Prisma.PurchaseRequestWhereInput = {}
 
@@ -33,6 +34,14 @@ export default async function HistoricoGeralPage({
   if (requesterFilter) {
     whereCondition.requester = {
       name: { contains: requesterFilter }
+    }
+  }
+  
+  if (itemFilter) {
+    whereCondition.items = {
+      some: {
+        description: { contains: itemFilter }
+      }
     }
   }
 
@@ -85,6 +94,11 @@ export default async function HistoricoGeralPage({
               <option value="Equipamento">Equipamento</option>
               <option value="Serviço">Serviço</option>
             </select>
+          </div>
+
+          <div>
+            <label className="label">Buscar por Item</label>
+            <input type="text" name="item" defaultValue={itemFilter} className="input-field" style={{ margin: 0 }} placeholder="Ex: Seringa" />
           </div>
 
           <div>
