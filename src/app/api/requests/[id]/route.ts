@@ -5,8 +5,8 @@ import { getCurrentUser } from '@/app/actions'
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser()
-    if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+    if (!user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
     const { id } = await params
@@ -14,11 +14,15 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     const request = await prisma.purchaseRequest.findUnique({ where: { id } })
     if (!request) {
-      return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 })
+      return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 })
+    }
+
+    if (user.role === 'SOLICITANTE' && (request.requesterId !== user.id || !['CRIADA', 'DEVOLVIDA_AJUSTES'].includes(request.currentStatus))) {
+      return NextResponse.json({ error: 'Você só pode editar seus próprios pedidos e que estejam com status Novos ou Devolvidos.' }, { status: 403 })
     }
 
     if (request.currentStatus === 'ENTREGUE' || request.currentStatus === 'CANCELADA') {
-      return NextResponse.json({ error: 'No  possvel editar pedidos finalizados' }, { status: 400 })
+      return NextResponse.json({ error: 'Não é possível editar pedidos finalizados' }, { status: 400 })
     }
 
     // Update items
@@ -50,7 +54,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     await prisma.statusHistory.create({
       data: {
         newStatus: request.currentStatus,
-        observation: 'Pedido editado pela ' + (user.role === 'COMPRADOR' ? 'Compras' : 'Diretoria'),
+        observation: 'Pedido editado pelo ' + (user.role === 'SOLICITANTE' ? 'Solicitante' : user.role === 'COMPRADOR' ? 'Comprador' : 'Diretor'),
         requestId: id,
         userId: user.id
       }
