@@ -15,7 +15,7 @@ export default async function SolicitanteDashboard() {
   })
 
   const columns = [
-    { id: 'novas', title: 'Novas / Análise', statuses: ['CRIADA', 'EM_ANALISE'], color: '#e2e8f0', borderColor: '#cbd5e1' },
+    { id: 'novas', title: 'Novas / Análise', statuses: ['CRIADA', 'EM_ANALISE', 'DEVOLVIDA_AJUSTES'], color: '#e2e8f0', borderColor: '#cbd5e1' },
     { id: 'cotacao', title: 'Em Cotação', statuses: ['EM_COTACAO'], color: '#fef08a', borderColor: '#fde047' },
     { id: 'autorizacao', title: 'Aguard. Aprovação', statuses: ['AGUARDANDO_AUTORIZACAO', 'AGUARDANDO_FINANCEIRO'], color: '#fed7aa', borderColor: '#fdba74' },
     { id: 'concluidas', title: 'Concluídas', statuses: ['APROVADA', 'REJEITADA', 'RECUSADA'], color: '#bbf7d0', borderColor: '#86efac' },

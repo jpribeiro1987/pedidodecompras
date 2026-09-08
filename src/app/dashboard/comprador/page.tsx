@@ -43,7 +43,7 @@ export default async function CompradorDashboard() {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', color: '#64748b' }}>
-                <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>ID</th>
+                <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Pedido (Data)</th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Solicitante</th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Descrição</th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Status</th>
