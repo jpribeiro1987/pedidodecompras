@@ -63,8 +63,16 @@ export function RequestForm({
       if (itemsData[i].type.indexOf('image') !== -1) {
         const file = itemsData[i].getAsFile()
         if (file) {
-          updateItem(index, 'file', file)
-          updateItem(index, 'previewUrl', URL.createObjectURL(file))
+          const newFile = new File([file], 'pasted_image_' + Date.now() + '.png', { type: file.type })
+          updateItem(index, 'file', newFile)
+          updateItem(index, 'previewUrl', URL.createObjectURL(newFile))
+          
+          const input = document.getElementById(`file_input_${index}`) as HTMLInputElement
+          if (input) {
+            const dataTransfer = new DataTransfer()
+            dataTransfer.items.add(newFile)
+            input.files = dataTransfer.files
+          }
         }
       }
     }
@@ -89,12 +97,6 @@ export function RequestForm({
         })
         formData.append('items', JSON.stringify(itemsWithoutFiles))
         formData.append('justification', justification)
-        
-        items.forEach((item, index) => {
-          if (item.file) {
-            formData.append(`item_image_${index}`, item.file)
-          }
-        })
         
         const res = await createRequestAction(formData)
         
@@ -205,6 +207,8 @@ export function RequestForm({
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <input 
+                  id={`file_input_${index}`}
+                  name={`item_image_${index}`}
                   type="file" 
                   accept="image/*"
                   onChange={(e) => handleFileChange(index, e)}
@@ -216,7 +220,12 @@ export function RequestForm({
                     <img src={item.previewUrl} alt="Preview" style={{ height: '60px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                     <button 
                       type="button"
-                      onClick={() => { updateItem(index, 'file', null); updateItem(index, 'previewUrl', ''); }}
+                      onClick={() => { 
+                        updateItem(index, 'file', null); 
+                        updateItem(index, 'previewUrl', ''); 
+                        const input = document.getElementById(`file_input_${index}`) as HTMLInputElement;
+                        if (input) input.value = '';
+                      }}
                       style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '10px' }}
                     >X</button>
                   </div>
