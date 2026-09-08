@@ -79,7 +79,10 @@ export default async function CompradorDashboard() {
                   return (
                     <tr key={group.isBatch ? group.batchId : req.id} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '1rem 0.5rem', fontSize: '0.875rem' }}>
-                        {isMulti ? `Pacote (${group.requests.length})` : req.id.split('-')[0]}
+                        <div style={{ fontWeight: 600 }}>{isMulti ? `Pacote (${group.requests.length})` : req.id.split('-')[0]}</div>
+                        <div style={{ color: '#64748b', fontSize: '0.75rem' }}>
+                          {new Date(req.createdAt).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
+                        </div>
                       </td>
                       <td style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>{req.requester.name}</td>
                       <td style={{ padding: '1rem 0.5rem' }}>

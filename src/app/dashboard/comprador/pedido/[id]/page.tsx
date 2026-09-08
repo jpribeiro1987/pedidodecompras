@@ -93,6 +93,10 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                 <p style={{ fontWeight: 500 }}>{request.requester.name} ({request.requester.department?.name})</p>
               </div>
               <div>
+                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Data da Solicitação</p>
+                <p>{new Date(request.createdAt).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</p>
+              </div>
+              <div>
                 <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Prioridade</p>
                 <p>{request.priority || 'Não definida'}</p>
               </div>
