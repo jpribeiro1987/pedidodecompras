@@ -31,6 +31,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const updated = await prisma.purchaseRequest.update({
       where: { id },
       data: {
+        ...(request.currentStatus === 'DEVOLVIDA_AJUSTES' ? { currentStatus: 'CRIADA' } : {}),
         justification: body.justification,
         departmentId: body.departmentId || undefined,
         deliveryDate: body.deliveryDate ? new Date(body.deliveryDate) : null,
@@ -53,8 +54,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     await prisma.statusHistory.create({
       data: {
-        newStatus: request.currentStatus,
-        observation: 'Pedido editado pelo ' + (user.role === 'SOLICITANTE' ? 'Solicitante' : user.role === 'COMPRADOR' ? 'Comprador' : 'Diretor'),
+        newStatus: request.currentStatus === 'DEVOLVIDA_AJUSTES' ? 'CRIADA' : request.currentStatus,
+        observation: request.currentStatus === 'DEVOLVIDA_AJUSTES' 
+          ? 'Pedido corrigido pelo Solicitante e devolvido para a Fila de Compras' 
+          : 'Pedido editado pelo ' + (user.role === 'SOLICITANTE' ? 'Solicitante' : user.role === 'COMPRADOR' ? 'Comprador' : 'Diretor'),
         requestId: id,
         userId: user.id
       }
