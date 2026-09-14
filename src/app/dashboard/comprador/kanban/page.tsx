@@ -8,7 +8,7 @@ export default async function KanbanPage(props: { searchParams: Promise<{ [key: 
   const searchParams = await props.searchParams
   const buyerFilter = searchParams.buyer as string | undefined
   const user = await getCurrentUser()
-  if (!user || user.role !== 'COMPRADOR') {
+  if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) {
     redirect('/')
   }
 
