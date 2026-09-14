@@ -2,19 +2,26 @@ import { getCurrentUser } from '@/app/actions'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import KanbanFilter from './KanbanFilter'
 
-export default async function KanbanPage() {
+export default async function KanbanPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+  const buyerFilter = searchParams.buyer as string | undefined
   const user = await getCurrentUser()
   if (!user || user.role !== 'COMPRADOR') {
     redirect('/')
   }
+
+  const allBuyers = await prisma.user.findMany({
+    where: { role: { in: ['COMPRADOR', 'AUTORIZADOR', 'ADMIN'] } }
+  })
 
   const requests = await prisma.purchaseRequest.findMany({
     where: {
       archived: false,
       currentStatus: {
         notIn: ['CANCELADA', 'RECUSADA']
-      }
+      },
+      ...(buyerFilter === 'unassigned' ? { buyerId: null } : buyerFilter && buyerFilter !== 'all' ? { buyerId: buyerFilter } : {})
     },
     include: {
       requester: { include: { department: true } },
@@ -59,7 +66,10 @@ export default async function KanbanPage() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Quadro Kanban (Fila de Compras)</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Quadro Kanban (Fila de Compras)</h1>
+          <KanbanFilter buyers={allBuyers} currentBuyer={buyerFilter || 'all'} />
+        </div>
         <Link href="/dashboard/comprador" className="btn" style={{ backgroundColor: '#e2e8f0', color: 'black' }}>
           Mudar para Visualização em Lista
         </Link>
