@@ -51,10 +51,16 @@ export function RequestForm({
     }
   }
 
-  const updateItem = (index: number, field: string, value: any) => {
-    const newItems = [...items]
-    newItems[index] = { ...newItems[index], [field]: value }
-    setItems(newItems)
+  const updateItem = (index: number, fieldOrUpdates: string | Record<string, any>, value?: any) => {
+    setItems(prev => {
+      const newItems = [...prev]
+      if (typeof fieldOrUpdates === 'string') {
+        newItems[index] = { ...newItems[index], [fieldOrUpdates]: value }
+      } else {
+        newItems[index] = { ...newItems[index], ...fieldOrUpdates }
+      }
+      return newItems
+    })
   }
 
   const handlePaste = (index: number, e: React.ClipboardEvent) => {
@@ -77,8 +83,7 @@ export function RequestForm({
       const currentFiles = items[index].files || []
       const currentPreviews = items[index].previewUrls || []
       const finalFiles = [...currentFiles, ...newFiles]
-      updateItem(index, 'files', finalFiles)
-      updateItem(index, 'previewUrls', [...currentPreviews, ...newPreviews])
+      updateItem(index, { files: finalFiles, previewUrls: [...currentPreviews, ...newPreviews] })
       
       const dataTransfer = new DataTransfer()
       finalFiles.forEach(f => dataTransfer.items.add(f))
@@ -95,8 +100,7 @@ export function RequestForm({
     const currentPreviews = items[index].previewUrls || []
     
     const finalFiles = [...currentFiles, ...files]
-    updateItem(index, 'files', finalFiles)
-    updateItem(index, 'previewUrls', [...currentPreviews, ...files.map(f => URL.createObjectURL(f))])
+    updateItem(index, { files: finalFiles, previewUrls: [...currentPreviews, ...files.map(f => URL.createObjectURL(f))] })
     
     const dataTransfer = new DataTransfer()
     finalFiles.forEach(f => dataTransfer.items.add(f))
@@ -248,8 +252,7 @@ export function RequestForm({
                           const newUrls = [...item.previewUrls]
                           newFiles.splice(uIndex, 1)
                           newUrls.splice(uIndex, 1)
-                          updateItem(index, 'files', newFiles)
-                          updateItem(index, 'previewUrls', newUrls)
+                          updateItem(index, { files: newFiles, previewUrls: newUrls })
                           const input = document.getElementById(`file_input_${index}`) as HTMLInputElement
                           if (input) {
                             const dt = new DataTransfer()
