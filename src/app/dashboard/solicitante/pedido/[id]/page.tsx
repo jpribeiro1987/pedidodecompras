@@ -35,7 +35,7 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
   if (request.batchId) {
     batchRequests = await prisma.purchaseRequest.findMany({
       where: { batchId: request.batchId },
-      include: { items: true, quotes: true }
+      include: { items: true, attachments: true, quotes: { include: { supplier: true } } }
     })
     batchRequests.sort((a, b) => a.id.localeCompare(b.id))
   }
@@ -145,6 +145,23 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
                             <img src={reqItem.imageUrl} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px', border: '1px solid #cbd5e1', marginTop: '0.5rem' }} />
                           </div>
                         ) : null}
+                        
+                        {/* Mostrar valor ganhador do item */}
+                        {req.quotes && req.quotes.some((q: any) => q.isWinner) && (
+                          <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#ecfdf5', borderRadius: '4px', border: '1px dashed #10b981' }}>
+                            <strong style={{ color: '#047857' }}>Valor Ganhador:</strong>
+                            <ul style={{ margin: '0.25rem 0 0 1rem', padding: 0, listStyle: 'none' }}>
+                              {req.quotes.filter((q: any) => q.isWinner).map((winner: any, wIdx: number) => {
+                                const total = (winner.negotiatedPrice || winner.price) + (winner.freight || 0);
+                                return (
+                                  <li key={wIdx} style={{ color: '#065f46' }}>
+                                    {winner.supplier ? winner.supplier.name : winner.supplierName}: <strong>{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+                                  </li>
+                                )
+                              })}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )
