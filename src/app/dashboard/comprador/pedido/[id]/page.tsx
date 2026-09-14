@@ -31,6 +31,15 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
 
   if (!request) notFound()
 
+  let batchRequests = [request]
+  if (request.batchId) {
+    batchRequests = await prisma.purchaseRequest.findMany({
+      where: { batchId: request.batchId },
+      include: { items: true }
+    })
+    batchRequests.sort((a, b) => a.id.localeCompare(b.id))
+  }
+
   const suppliers = await prisma.supplier.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } })
 
   const config = await prisma.systemConfig.findUnique({ where: { key: 'WINNER_CRITERIA_LIST' } })
@@ -107,7 +116,57 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                 </div>
               )}
               <div style={{ gridColumn: '1 / -1' }}>
-                <RequestItemsDisplay request={request} />
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#334155', marginBottom: '0.75rem' }}>
+                    Itens do Pacote {batchRequests.length > 1 ? `(${batchRequests.length} itens)` : ''}
+                  </h3>
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                    {batchRequests.map((req, idx) => {
+                      const reqItem = (req.items && req.items.length > 0) ? req.items[0] : req;
+                      const isCurrent = req.id === request.id;
+                      return (
+                        <div key={req.id} style={{ 
+                          padding: '1rem', 
+                          backgroundColor: isCurrent ? '#f0fdf4' : '#f8fafc', 
+                          border: isCurrent ? '2px solid #22c55e' : '1px solid #e2e8f0', 
+                          borderRadius: '6px' 
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <span style={{ fontWeight: 600, fontSize: '1rem', color: isCurrent ? '#15803d' : '#0f172a' }}>
+                              {idx + 1}. {reqItem.description} {isCurrent && '(Analisando Agora)'}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.25rem 0.5rem', backgroundColor: '#e2e8f0', borderRadius: '999px' }}>
+                              Status: {req.currentStatus}
+                            </span>
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
+                            <div><strong>Quantidade:</strong> {reqItem.quantity}</div>
+                            <div><strong>Prioridade:</strong> {req.priority || 'Não definida'}</div>
+                            {reqItem.link && (
+                              <div style={{ gridColumn: '1 / -1' }}>
+                                <strong>Link:</strong> <a href={reqItem.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', wordBreak: 'break-all' }}>Acessar</a>
+                              </div>
+                            )}
+                            {reqItem.imageUrl && (
+                              <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem' }}>
+                                <strong>Anexo/Print:</strong> <a href={reqItem.imageUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 600, marginLeft: '0.5rem' }}>📷 Abrir Imagem Original</a>
+                                <br />
+                                <img src={reqItem.imageUrl} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '4px', border: '1px solid #cbd5e1', marginTop: '0.5rem' }} />
+                              </div>
+                            )}
+                            {!isCurrent && (
+                              <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem' }}>
+                                <Link href={`/dashboard/comprador/pedido/${req.id}`} className="btn" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}>
+                                  Ir para este item
+                                </Link>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
               {request.link && (
                 <div style={{ gridColumn: '1 / -1' }}>
