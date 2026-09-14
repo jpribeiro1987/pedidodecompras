@@ -128,11 +128,23 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
                             <strong>Link:</strong> <a href={reqItem.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', wordBreak: 'break-all' }}>Acessar</a>
                           </div>
                         )}
-                        {reqItem.imageUrl && (
+                        {req.attachments && req.attachments.length > 0 ? (
+                          <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                            {req.attachments.map((att: any, attIdx: number) => (
+                              <div key={attIdx}>
+                                <strong>Anexo/Print {attIdx + 1}:</strong> <a href={att.url} target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 600, marginLeft: '0.5rem' }}>📷 Ver Imagem</a>
+                                <br />
+                                <img src={att.url} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px', border: '1px solid #cbd5e1', marginTop: '0.5rem' }} />
+                              </div>
+                            ))}
+                          </div>
+                        ) : reqItem.imageUrl ? (
                           <div style={{ gridColumn: '1 / -1' }}>
                             <strong>Anexo/Print:</strong> <a href={reqItem.imageUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 600 }}>📷 Ver Imagem</a>
+                            <br />
+                            <img src={reqItem.imageUrl} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px', border: '1px solid #cbd5e1', marginTop: '0.5rem' }} />
                           </div>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   )

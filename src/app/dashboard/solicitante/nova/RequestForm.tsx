@@ -25,8 +25,8 @@ export function RequestForm({
     priority: 'MEDIA',
     classification: 'Consumo',
     groupId: '',
-    file: null as File | null,
-    previewUrl: '' as string
+    files: [] as File[],
+    previewUrls: [] as string[]
   }])
   const [justification, setJustification] = useState('')
   const [loading, setLoading] = useState(false)
@@ -40,8 +40,8 @@ export function RequestForm({
       priority: 'MEDIA',
       classification: 'Consumo',
       groupId: '',
-      file: null,
-      previewUrl: ''
+      files: [],
+      previewUrls: []
     }])
   }
 
@@ -58,31 +58,51 @@ export function RequestForm({
   }
 
   const handlePaste = (index: number, e: React.ClipboardEvent) => {
-    const itemsData = e.clipboardData.items
+    const itemsData = e.clipboardData?.items
+    if (!itemsData) return
+    let newFiles = []
+    let newPreviews = []
     for (let i = 0; i < itemsData.length; i++) {
       if (itemsData[i].type.indexOf('image') !== -1) {
         const file = itemsData[i].getAsFile()
         if (file) {
-          const newFile = new File([file], 'pasted_image_' + Date.now() + '.png', { type: file.type })
-          updateItem(index, 'file', newFile)
-          updateItem(index, 'previewUrl', URL.createObjectURL(newFile))
-          
-          const input = document.getElementById(`file_input_${index}`) as HTMLInputElement
-          if (input) {
-            const dataTransfer = new DataTransfer()
-            dataTransfer.items.add(newFile)
-            input.files = dataTransfer.files
-          }
+          const newFile = new File([file], 'pasted_image_' + Date.now() + '_' + i + '.png', { type: file.type })
+          newFiles.push(newFile)
+          newPreviews.push(URL.createObjectURL(newFile))
         }
+      }
+    }
+    
+    if (newFiles.length > 0) {
+      const currentFiles = items[index].files || []
+      const currentPreviews = items[index].previewUrls || []
+      const finalFiles = [...currentFiles, ...newFiles]
+      updateItem(index, 'files', finalFiles)
+      updateItem(index, 'previewUrls', [...currentPreviews, ...newPreviews])
+      
+      const dataTransfer = new DataTransfer()
+      finalFiles.forEach(f => dataTransfer.items.add(f))
+      const input = document.getElementById(`file_input_${index}`) as HTMLInputElement
+      if (input) {
+        input.files = dataTransfer.files
       }
     }
   }
 
   const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      updateItem(index, 'file', file)
-      updateItem(index, 'previewUrl', URL.createObjectURL(file))
+    const files = Array.from(e.target.files || [])
+    const currentFiles = items[index].files || []
+    const currentPreviews = items[index].previewUrls || []
+    
+    const finalFiles = [...currentFiles, ...files]
+    updateItem(index, 'files', finalFiles)
+    updateItem(index, 'previewUrls', [...currentPreviews, ...files.map(f => URL.createObjectURL(f))])
+    
+    const dataTransfer = new DataTransfer()
+    finalFiles.forEach(f => dataTransfer.items.add(f))
+    const input = document.getElementById(`file_input_${index}`) as HTMLInputElement
+    if (input) {
+      input.files = dataTransfer.files
     }
   }
 
@@ -210,27 +230,39 @@ export function RequestForm({
                   id={`file_input_${index}`}
                   name={`item_image_${index}`}
                   type="file" 
-                  accept="image/*"
+                  multiple
+                  accept="image/*,application/pdf"
                   onChange={(e) => handleFileChange(index, e)}
                   style={{ fontSize: '0.9rem' }}
                 />
-                
-                {item.previewUrl && (
-                  <div style={{ position: 'relative' }}>
-                    <img src={item.previewUrl} alt="Preview" style={{ height: '60px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
-                    <button 
-                      type="button"
-                      onClick={() => { 
-                        updateItem(index, 'file', null); 
-                        updateItem(index, 'previewUrl', ''); 
-                        const input = document.getElementById(`file_input_${index}`) as HTMLInputElement;
-                        if (input) input.value = '';
-                      }}
-                      style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '10px' }}
-                    >X</button>
-                  </div>
-                )}
               </div>
+              {item.previewUrls && item.previewUrls.length > 0 && (
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+                  {item.previewUrls.map((url, uIndex) => (
+                    <div key={uIndex} style={{ position: 'relative' }}>
+                      <img src={url} alt="Preview" style={{ height: '60px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          const newFiles = [...item.files]
+                          const newUrls = [...item.previewUrls]
+                          newFiles.splice(uIndex, 1)
+                          newUrls.splice(uIndex, 1)
+                          updateItem(index, 'files', newFiles)
+                          updateItem(index, 'previewUrls', newUrls)
+                          const input = document.getElementById(`file_input_${index}`) as HTMLInputElement
+                          if (input) {
+                            const dt = new DataTransfer()
+                            newFiles.forEach(f => dt.items.add(f))
+                            input.files = dt.files
+                          }
+                        }}
+                        style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '10px' }}
+                      >X</button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Novas Configurações Individuais */}

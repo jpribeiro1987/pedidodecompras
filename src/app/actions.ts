@@ -90,15 +90,19 @@ export async function createRequestAction(formData: FormData) {
       const item = items[index]
       
       let imageUrl = null
-      const file = formData.get(`item_image_${index}`) as File | null
-      if (file && file.size > 0) {
-        const bytes = await file.arrayBuffer()
-        const buffer = Buffer.from(bytes)
-        const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
-        const uploadDir = join(process.cwd(), 'public/uploads')
-        await writeFile(join(uploadDir, filename), buffer)
-        imageUrl = `/uploads/${filename}`
+      const files = formData.getAll(`item_image_${index}`) as File[]
+      const fileUrls = []
+      for (const file of files) {
+        if (file && file.size > 0) {
+          const bytes = await file.arrayBuffer()
+          const buffer = Buffer.from(bytes)
+          const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
+          const uploadDir = join(process.cwd(), 'public/uploads')
+          await writeFile(join(uploadDir, filename), buffer)
+          fileUrls.push(`/uploads/${filename}`)
+        }
       }
+      if (fileUrls.length > 0) imageUrl = fileUrls[0]
 
       const newRequest = await prisma.purchaseRequest.create({
         data: {
@@ -112,6 +116,9 @@ export async function createRequestAction(formData: FormData) {
           ...(item.groupId ? { group: { connect: { id: item.groupId } } } : {}),
           department: departmentId ? { connect: { id: departmentId } } : undefined,
           requester: { connect: { id: targetRequesterId } },
+          attachments: fileUrls.length > 0 ? {
+            create: fileUrls.map(url => ({ url, name: 'Anexo' }))
+          } : undefined,
           items: {
             create: [{
               description: item.description,
