@@ -74,6 +74,11 @@ export default async function DashboardLayout({
                   </Link>
                 </li>
                 <li>
+                  <Link href="/dashboard/comprador/kanban" style={{ display: 'block', padding: '0.75rem 1.5rem', transition: 'background-color 0.2s' }}>
+                    Quadro Kanban
+                  </Link>
+                </li>
+                <li>
                   <Link href="/dashboard/solicitante/nova" style={{ display: 'block', padding: '0.75rem 1.5rem', transition: 'background-color 0.2s' }}>
                     Nova Solicitação
                   </Link>
