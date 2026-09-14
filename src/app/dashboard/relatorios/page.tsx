@@ -16,6 +16,7 @@ export default async function RelatoriosPage({
   
   const statusFilter = typeof resolvedSearchParams.status === 'string' ? resolvedSearchParams.status : ''
   const requesterFilter = typeof resolvedSearchParams.requester === 'string' ? resolvedSearchParams.requester : ''
+  const departmentFilter = typeof resolvedSearchParams.department === 'string' ? resolvedSearchParams.department : ''
   const dateStart = typeof resolvedSearchParams.dateStart === 'string' ? resolvedSearchParams.dateStart : ''
   const dateEnd = typeof resolvedSearchParams.dateEnd === 'string' ? resolvedSearchParams.dateEnd : ''
   const classificationFilter = typeof resolvedSearchParams.classification === 'string' ? resolvedSearchParams.classification : ''
@@ -30,9 +31,10 @@ export default async function RelatoriosPage({
     whereCondition.classification = classificationFilter
   }
 
-  if (requesterFilter) {
+  if (requesterFilter || departmentFilter) {
     whereCondition.requester = {
-      name: { contains: requesterFilter }
+      ...(requesterFilter ? { name: { contains: requesterFilter } } : {}),
+      ...(departmentFilter ? { departmentId: departmentFilter } : {})
     }
   }
 
@@ -51,6 +53,8 @@ export default async function RelatoriosPage({
     orderBy: { createdAt: 'desc' },
     include: { requester: { include: { department: true } }, quotes: { include: { supplier: true } } }
   })
+
+  const allDepartments = await prisma.department.findMany({ orderBy: { name: 'asc' } })
 
   // Get distinct statuses for the filter dropdown
   const allStatuses = [
@@ -90,6 +94,16 @@ export default async function RelatoriosPage({
           <div>
             <label className="label">Solicitante (Nome)</label>
             <input type="text" name="requester" defaultValue={requesterFilter} className="input-field" style={{ margin: 0 }} placeholder="Ex: João" />
+          </div>
+
+          <div>
+            <label className="label">Setor Solicitante</label>
+            <select name="department" defaultValue={departmentFilter} className="input-field" style={{ margin: 0 }}>
+              <option value="">Todos</option>
+              {allDepartments.map(dep => (
+                <option key={dep.id} value={dep.id}>{dep.name}</option>
+              ))}
+            </select>
           </div>
 
           <div>

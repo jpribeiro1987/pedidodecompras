@@ -2,21 +2,46 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/app/actions'
 import { redirect } from 'next/navigation'
 
-export default async function EstatisticasPage() {
+export default async function EstatisticasPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await props.searchParams
   const user = await getCurrentUser()
   if (!user || !['ADMIN', 'AUTORIZADOR', 'COMPRADOR'].includes(user.role)) {
     redirect('/dashboard')
   }
 
+  const buyerFilter = typeof searchParams.buyer === 'string' ? searchParams.buyer : ''
+  const dateStart = typeof searchParams.dateStart === 'string' ? searchParams.dateStart : ''
+  const dateEnd = typeof searchParams.dateEnd === 'string' ? searchParams.dateEnd : ''
+
+  const whereCondition: any = {}
+  
+  if (buyerFilter) {
+    if (buyerFilter === 'unassigned') {
+      whereCondition.buyerId = null
+    } else if (buyerFilter !== 'all') {
+      whereCondition.buyerId = buyerFilter
+    }
+  }
+
+  if (dateStart || dateEnd) {
+    whereCondition.createdAt = {}
+    if (dateStart) {
+      whereCondition.createdAt.gte = new Date(`${dateStart}T00:00:00.000Z`)
+    }
+    if (dateEnd) {
+      whereCondition.createdAt.lte = new Date(`${dateEnd}T23:59:59.999Z`)
+    }
+  }
+
   // Aggregate stats
-  const totalRequests = await prisma.purchaseRequest.count()
+  const totalRequests = await prisma.purchaseRequest.count({ where: whereCondition })
   
   const approvedRequests = await prisma.purchaseRequest.count({
-    where: { currentStatus: 'APROVADA' }
+    where: { ...whereCondition, currentStatus: 'APROVADA' }
   })
   
   const rejectedRequests = await prisma.purchaseRequest.count({
-    where: { currentStatus: 'REJEITADA' }
+    where: { ...whereCondition, currentStatus: 'REJEITADA' }
   })
   
   const inProgressRequests = totalRequests - approvedRequests - rejectedRequests
@@ -24,7 +49,7 @@ export default async function EstatisticasPage() {
   // Financial volume
   // We calculate sum of quotes that are winners AND whose request is APROVADA
   const approvedWithQuotes = await prisma.purchaseRequest.findMany({
-    where: { currentStatus: 'APROVADA' },
+    where: { ...whereCondition, currentStatus: 'APROVADA' },
     include: { quotes: { where: { isWinner: true } } }
   })
 
@@ -39,7 +64,12 @@ export default async function EstatisticasPage() {
 
   // Sector distribution
   const requestsWithDept = await prisma.purchaseRequest.findMany({
+    where: whereCondition,
     include: { requester: { include: { department: true } } }
+  })
+
+  const allBuyers = await prisma.user.findMany({
+    where: { role: { in: ['COMPRADOR', 'AUTORIZADOR', 'ADMIN'] } }
   })
 
   const deptCounts: Record<string, number> = {}
@@ -55,6 +85,33 @@ export default async function EstatisticasPage() {
   return (
     <div>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '2rem' }}>Dashboard de Estatísticas</h1>
+
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <form style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div>
+            <label className="label">Comprador</label>
+            <select name="buyer" defaultValue={buyerFilter} className="input-field" style={{ margin: 0, minWidth: '200px' }}>
+              <option value="all">Todos</option>
+              <option value="unassigned">Sem responsável</option>
+              {allBuyers.map(b => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label">Data Início</label>
+            <input type="date" name="dateStart" defaultValue={dateStart} className="input-field" style={{ margin: 0 }} />
+          </div>
+          <div>
+            <label className="label">Data Fim</label>
+            <input type="date" name="dateEnd" defaultValue={dateEnd} className="input-field" style={{ margin: 0 }} />
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button type="submit" className="btn btn-primary">Filtrar</button>
+            <a href="/dashboard/estatisticas" className="btn" style={{ backgroundColor: '#e2e8f0', color: '#1e293b' }}>Limpar</a>
+          </div>
+        </form>
+      </div>
 
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
