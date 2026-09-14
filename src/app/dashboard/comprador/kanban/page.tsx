@@ -4,7 +4,8 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import KanbanFilter from './KanbanFilter'
 
-export default async function KanbanPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function KanbanPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await props.searchParams
   const buyerFilter = searchParams.buyer as string | undefined
   const user = await getCurrentUser()
   if (!user || user.role !== 'COMPRADOR') {
