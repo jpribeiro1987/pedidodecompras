@@ -35,7 +35,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
   if (request.batchId) {
     batchRequests = await prisma.purchaseRequest.findMany({
       where: { batchId: request.batchId },
-      include: { items: true, attachments: true, quotes: { include: { supplier: true } } }
+      include: { items: true, attachments: true, quotes: { include: { supplier: true } }, requester: { include: { department: true } } }
     })
     batchRequests.sort((a, b) => a.id.localeCompare(b.id))
   }
@@ -143,7 +143,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                             <div><strong>Quantidade:</strong> {reqItem.quantity}</div>
                             <div><strong>Prioridade:</strong> {req.priority || 'Não definida'}</div>
                             <div style={{ gridColumn: '1 / -1' }}>
-                              <strong>Solicitante:</strong> {req.requester.name} ({req.requester.department?.name || 'Sem Setor'})
+                              <strong>Solicitante:</strong> {req.requester?.name || 'Desconhecido'} ({req.requester?.department?.name || 'Sem Setor'})
                             </div>
                             {reqItem.link && (
                               <div style={{ gridColumn: '1 / -1' }}>
