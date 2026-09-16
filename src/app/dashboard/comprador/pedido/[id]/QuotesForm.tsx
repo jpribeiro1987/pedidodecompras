@@ -5,13 +5,39 @@ import { updateRequestStatusAction } from '@/app/actions'
 import { createSupplierAction } from '@/app/adminActions'
 import { useRouter } from 'next/navigation'
 
-export function QuotesForm({ requestId, suppliers = [], autoApproveLimit = 0, criteriaList = [] }: { requestId: string, suppliers?: any[], autoApproveLimit?: number, criteriaList?: string[] }) {
+export function QuotesForm({ 
+  requestId, 
+  suppliers = [], 
+  autoApproveLimit = 0, 
+  criteriaList = [],
+  existingQuotes = [],
+  existingWinnerCriteria = '',
+  existingDeliveryDate = ''
+}: { 
+  requestId: string, 
+  suppliers?: any[], 
+  autoApproveLimit?: number, 
+  criteriaList?: string[],
+  existingQuotes?: any[],
+  existingWinnerCriteria?: string,
+  existingDeliveryDate?: string
+}) {
   const router = useRouter()
-  // Start with 1 quote to allow single-supplier quotes
-  const [quotes, setQuotes] = useState([{ supplierId: '', price: '', negotiatedPrice: '', freight: '', supplierSearch: '' }])
-  const [winnerIndex, setWinnerIndex] = useState<number>(0)
-  const [winnerCriteria, setWinnerCriteria] = useState(criteriaList[0] || 'Menor Preço')
-  const [deliveryDate, setDeliveryDate] = useState('')
+  
+  const initialQuotes = existingQuotes.length > 0 ? existingQuotes.map((q: any) => ({
+    supplierId: q.supplierId || '',
+    price: q.price?.toString() || '',
+    negotiatedPrice: q.negotiatedPrice?.toString() || '',
+    freight: q.freight?.toString() || '',
+    supplierSearch: q.supplier ? `${q.supplier.name} ${q.supplier.cnpj ? `(${q.supplier.cnpj})` : ''}` : (q.supplierName || '')
+  })) : [{ supplierId: '', price: '', negotiatedPrice: '', freight: '', supplierSearch: '' }]
+  
+  const initialWinnerIndex = existingQuotes.findIndex((q: any) => q.isWinner)
+  
+  const [quotes, setQuotes] = useState(initialQuotes)
+  const [winnerIndex, setWinnerIndex] = useState<number>(initialWinnerIndex >= 0 ? initialWinnerIndex : 0)
+  const [winnerCriteria, setWinnerCriteria] = useState(existingWinnerCriteria || criteriaList[0] || 'Menor Preço')
+  const [deliveryDate, setDeliveryDate] = useState(existingDeliveryDate ? new Date(existingDeliveryDate).toISOString().split('T')[0] : '')
   
   const [showSupplierModal, setShowSupplierModal] = useState(false)
   const [newSupplierName, setNewSupplierName] = useState('')

@@ -123,6 +123,9 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
                         <div><strong>Quantidade:</strong> {reqItem.quantity}</div>
                         <div><strong>Prioridade:</strong> {req.priority || 'Não definida'}</div>
+                        <div style={{ gridColumn: '1 / -1' }}>
+                          <strong>Solicitante:</strong> {req.requester.name} ({req.requester.department?.name || 'Sem Setor'})
+                        </div>
                         {reqItem.link && (
                           <div style={{ gridColumn: '1 / -1' }}>
                             <strong>Link:</strong> <a href={reqItem.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', wordBreak: 'break-all' }}>Acessar</a>

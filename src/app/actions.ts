@@ -531,6 +531,7 @@ export async function markAsDeliveredAction(formData: FormData) {
     where: { id },
     data: {
       currentStatus: 'ENTREGUE',
+      archived: true,
       history: {
         create: {
           previousStatus: request.currentStatus,

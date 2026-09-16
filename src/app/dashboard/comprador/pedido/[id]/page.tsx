@@ -142,6 +142,9 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
                             <div><strong>Quantidade:</strong> {reqItem.quantity}</div>
                             <div><strong>Prioridade:</strong> {req.priority || 'Não definida'}</div>
+                            <div style={{ gridColumn: '1 / -1' }}>
+                              <strong>Solicitante:</strong> {req.requester.name} ({req.requester.department?.name || 'Sem Setor'})
+                            </div>
                             {reqItem.link && (
                               <div style={{ gridColumn: '1 / -1' }}>
                                 <strong>Link:</strong> <a href={reqItem.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', wordBreak: 'break-all' }}>Acessar</a>
@@ -261,7 +264,15 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                 )}
               </>
             ) : ['CRIADA', 'EM_COTACAO', 'AGUARDANDO_AUTORIZACAO'].includes(request.currentStatus) ? (
-              <QuotesForm requestId={request.id} suppliers={suppliers.map((s: any) => ({ id: s.id, name: s.name, cnpj: s.cnpj }))} autoApproveLimit={autoApproveLimit} criteriaList={criteriaList} />
+              <QuotesForm 
+                requestId={request.id} 
+                suppliers={suppliers.map((s: any) => ({ id: s.id, name: s.name, cnpj: s.cnpj }))} 
+                autoApproveLimit={autoApproveLimit} 
+                criteriaList={criteriaList} 
+                existingQuotes={request.quotes}
+                existingWinnerCriteria={request.winnerCriteria || ''}
+                existingDeliveryDate={request.deliveryDate ? request.deliveryDate.toISOString() : ''}
+              />
             ) : null}
 
             {['CRIADA', 'EM_ANALISE', 'EM_COTACAO'].includes(request.currentStatus) && (
