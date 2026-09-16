@@ -196,6 +196,25 @@ export async function updateConfigAction(formData: FormData) {
   revalidatePath("/dashboard/admin/configuracoes")
 }
 
+export async function updateSmtpConfigAction(formData: FormData) {
+  const user = await getCurrentUser()
+  if (!user || user?.role !== "ADMIN") throw new Error("Unauthorized")
+
+  const host = formData.get("host") as string
+  const port = formData.get("port") as string
+  const smtpUser = formData.get("user") as string
+  const pass = formData.get("pass") as string
+  const from = formData.get("from") as string
+
+  if (host) await prisma.systemConfig.upsert({ where: { key: 'SMTP_HOST' }, update: { value: host }, create: { key: 'SMTP_HOST', value: host } })
+  if (port) await prisma.systemConfig.upsert({ where: { key: 'SMTP_PORT' }, update: { value: port }, create: { key: 'SMTP_PORT', value: port } })
+  if (smtpUser) await prisma.systemConfig.upsert({ where: { key: 'SMTP_USER' }, update: { value: smtpUser }, create: { key: 'SMTP_USER', value: smtpUser } })
+  if (pass) await prisma.systemConfig.upsert({ where: { key: 'SMTP_PASS' }, update: { value: pass }, create: { key: 'SMTP_PASS', value: pass } })
+  if (from) await prisma.systemConfig.upsert({ where: { key: 'SMTP_FROM' }, update: { value: from }, create: { key: 'SMTP_FROM', value: from } })
+
+  revalidatePath("/dashboard/admin/configuracoes")
+}
+
 export async function updateWinnerCriteriaAction(criteria: string[]) {
   const user = await getCurrentUser()
   if (!user || user.role !== 'ADMIN') return { error: 'Não autorizado' }

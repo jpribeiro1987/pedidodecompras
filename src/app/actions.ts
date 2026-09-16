@@ -246,6 +246,11 @@ export async function updateRequestStatusAction(formData: FormData) {
     }
   })
 
+  if (newStatus === 'DISPONIVEL_RETIRADA' || newStatus === 'ENTREGUE') {
+    const { sendPickupStatusEmail } = await import('@/lib/mailer')
+    await sendPickupStatusEmail(requestId, newStatus)
+  }
+
   // Redirect to clear form depending on role
   if (user.role === 'COMPRADOR') {
     redirect('/dashboard/comprador')
@@ -542,6 +547,9 @@ export async function markAsDeliveredAction(formData: FormData) {
       }
     }
   })
+
+  const { sendPickupStatusEmail } = await import('@/lib/mailer')
+  await sendPickupStatusEmail(id, 'ENTREGUE')
 
   revalidatePath(`/dashboard/${user.role.toLowerCase()}/pedido/${id}`)
 }
