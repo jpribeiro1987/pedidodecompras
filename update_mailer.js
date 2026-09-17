@@ -1,31 +1,47 @@
 const fs = require('fs');
 let content = fs.readFileSync('src/lib/mailer.ts', 'utf8');
 
-const extraInfo = `
-      ${"${request.winnerJustification ? `"}
-      <div style="margin-top: 20px;">
-        <p><strong>Justificativa do Comprador (Cotação):</strong></p>
-        <p style="background-color: #f8fafc; padding: 12px; border-left: 4px solid #94a3b8; font-size: 14px; border-radius: 4px;">
-          ${"${request.winnerJustification}"}
-        </p>
-      </div>
-      ${"` : ''}"}
+// Include quotes in query for both sendPickupStatusEmail and sendManualStatusEmail
+content = content.replace(/buyer: true, observers: true }/g, "buyer: true, observers: true, quotes: { include: { supplier: true } } }");
 
-      ${"${request.history.some(h => h.observation && h.observation.trim() !== 'Atualização de status' && h.observation.trim() !== 'Pedido editado' && !h.observation.startsWith('Mercadoria informada')) ? `"}
+// Generate quotes HTML
+const quotesHtmlTarget = "const itemsListHtml = request.items.map(item => `<li>${item.quantity}x ${item.description}</li>`).join('')";
+const quotesHtmlReplace = `const itemsListHtml = request.items.map(item => \`<li>\${item.quantity}x \${item.description}</li>\`).join('')
+  
+  let quotesHtml = '';
+  if (request.quotes && request.quotes.length > 0) {
+    quotesHtml = \`
       <div style="margin-top: 20px;">
-        <p><strong>Observações do Processo:</strong></p>
-        <ul style="background-color: #f8fafc; padding: 12px 12px 12px 30px; font-size: 14px; border-radius: 6px;">
-          ${"${request.history.filter(h => h.observation && h.observation.trim() !== 'Atualização de status' && h.observation.trim() !== 'Pedido editado' && !h.observation.startsWith('Mercadoria informada')).map(h => `"}
-            <li style="margin-bottom: 8px;">
-              <strong>${"${new Date(h.date).toLocaleDateString('pt-BR')}"}:</strong> ${"${h.observation}"}
-              <br/><span style="font-size: 11px; color: #64748b;">(por ${"${h.user?.name || 'Sistema'}"})</span>
-            </li>
-          ${"`).join('')}"}
-        </ul>
+        <p><strong>Cotações Realizadas (Ação do Comprador):</strong></p>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
+          <thead>
+            <tr style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+              <th style="padding: 10px;">Fornecedor</th>
+              <th style="padding: 10px;">Valor Inicial</th>
+              <th style="padding: 10px;">Valor Negociado</th>
+              <th style="padding: 10px;">Vencedor</th>
+            </tr>
+          </thead>
+          <tbody>
+            \${request.quotes.map(q => \`
+              <tr style="border-bottom: 1px solid #e2e8f0; \${q.isWinner ? 'background-color: #dcfce7;' : ''}">
+                <td style="padding: 10px;">\${q.supplier?.name || q.supplierName || 'Não informado'}</td>
+                <td style="padding: 10px;">R$ \${q.price.toFixed(2)}</td>
+                <td style="padding: 10px;">\${q.negotiatedPrice ? \`R$ \${q.negotiatedPrice.toFixed(2)}\` : '-'}</td>
+                <td style="padding: 10px;">\${q.isWinner ? '<strong>Sim</strong>' : 'Não'}</td>
+              </tr>
+            \`).join('')}
+          </tbody>
+        </table>
       </div>
-      ${"` : ''}"}
-`;
+    \`
+  }`;
+content = content.replace(quotesHtmlTarget, quotesHtmlReplace);
+content = content.replace(quotesHtmlTarget, quotesHtmlReplace); // for the second function
 
-content = content.replace(/<\/ul>\s*<br \/>\s*<p>As imagens/g, '</ul>' + extraInfo + '      <br />\n      <p>As imagens');
+const insertQuotesTarget = "      ${request.winnerJustification ? `\n      <div style=\"margin-top: 20px;\">";
+const insertQuotesReplace = "      ${quotesHtml}\n      ${request.winnerJustification ? `\n      <div style=\"margin-top: 20px;\">";
+content = content.replace(insertQuotesTarget, insertQuotesReplace);
+content = content.replace(insertQuotesTarget, insertQuotesReplace); // for the second function
 
 fs.writeFileSync('src/lib/mailer.ts', content);

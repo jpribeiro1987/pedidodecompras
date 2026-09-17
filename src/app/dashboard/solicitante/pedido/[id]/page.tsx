@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { AttachmentViewer } from '@/components/AttachmentViewer'
 import { ConfirmButton } from '@/components/ConfirmButton'
 import ManageObservers from '@/components/ManageObservers'
+import { PrintButton } from '@/components/PrintButton'
 
 export default async function PedidoDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   try {
@@ -105,7 +106,15 @@ export default async function PedidoDetailsPage({ params }: { params: Promise<{ 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
         <div>
           <div className="card" style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
+            {request.currentStatus === 'DEVOLVIDA_AJUSTES' && (
+                  <div style={{ padding: '1rem', backgroundColor: '#fee2e2', borderRadius: '8px', border: '1px solid #f87171', marginBottom: '1.5rem' }}>
+                    <h4 style={{ fontWeight: 600, color: '#b91c1c', marginBottom: '0.5rem' }}>Atenção: Solicitação Devolvida para Ajustes</h4>
+                    <p style={{ color: '#991b1b', fontSize: '0.875rem' }}>
+                      <strong>Motivo / Decisão:</strong> {request.history.find(h => h.newStatus === 'DEVOLVIDA_AJUSTES')?.observation || 'Não informado.'}
+                    </p>
+                  </div>
+                )}
+                <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
               Informações do Pedido
             </h2>
             

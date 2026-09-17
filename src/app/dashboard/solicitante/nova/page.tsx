@@ -33,6 +33,8 @@ export default async function NovaSolicitacaoPage() {
     })
   }
 
+  const allUsers = await prisma.user.findMany({ select: { id: true, name: true, department: true }, orderBy: { name: 'asc' } })
+
   const backLink = (user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR') ? '/dashboard/comprador' : '/dashboard/solicitante'
 
   return (
@@ -44,7 +46,7 @@ export default async function NovaSolicitacaoPage() {
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0 }}>Nova Solicitação de Compra</h1>
       </div>
 
-      <RequestForm user={user} groups={groups} targetUsers={targetUsers} isComprador={user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR'} departments={departments} />
+      <RequestForm user={user} groups={groups} targetUsers={targetUsers} allUsers={allUsers} isComprador={user.role === 'COMPRADOR' || user.role === 'AUTORIZADOR'} departments={departments} />
     </div>
   )
 }

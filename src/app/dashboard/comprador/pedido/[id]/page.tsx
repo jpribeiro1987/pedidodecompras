@@ -9,6 +9,7 @@ import { QuotesForm } from './QuotesForm'
 import { ExtendDeliveryForm } from './ExtendDeliveryForm'
 import { AttachmentViewer } from '@/components/AttachmentViewer'
 import ManageObservers from '@/components/ManageObservers'
+import { PrintButton } from '@/components/PrintButton'
 
 export default async function CompradorPedidoPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params
@@ -107,7 +108,7 @@ export default async function CompradorPedidoPage(props: { params: Promise<{ id:
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
               <div>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Solicitante</p>
+                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Setor Solicitante</p>
                 <p style={{ fontWeight: 500 }}>{request.requester.name} ({request.requester.department?.name})</p>
               </div>
               <div>

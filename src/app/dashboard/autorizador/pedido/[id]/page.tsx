@@ -63,7 +63,7 @@ export default async function AutorizadorPedidoPage({ params }: { params: Promis
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
               <div>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Solicitante</p>
+                <p style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>Setor Solicitante</p>
                 <p style={{ fontWeight: 500 }}>{request.requester.name} ({request.requester.department?.name})</p>
               </div>
               {request.deliveryDate && (

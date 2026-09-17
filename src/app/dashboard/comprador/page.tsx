@@ -48,7 +48,8 @@ export default async function CompradorDashboard({ searchParams }: { searchParam
               <tr style={{ borderBottom: '1px solid var(--border)', color: '#64748b' }}>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}><Link href={`?sort=date&order=${sort === 'date' && order === 'desc' ? 'asc' : 'desc'}`} style={{ color: 'inherit', textDecoration: 'none' }}>Pedido (Data) {sort === 'date' ? (order === 'asc' ? '↑' : '↓') : ''}</Link></th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}><Link href={`?sort=solicitante&order=${sort === 'solicitante' && order === 'asc' ? 'desc' : 'asc'}`} style={{ color: 'inherit', textDecoration: 'none' }}>Solicitante {sort === 'solicitante' ? (order === 'asc' ? '↑' : '↓') : ''}</Link></th>
-                <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Descrição</th>
+                <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Local de Consumo</th>
+                  <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Descrição</th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}><Link href={`?sort=status&order=${sort === 'status' && order === 'asc' ? 'desc' : 'asc'}`} style={{ color: 'inherit', textDecoration: 'none' }}>Status {sort === 'status' ? (order === 'asc' ? '↑' : '↓') : ''}</Link></th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}><Link href={`?sort=responsavel&order=${sort === 'responsavel' && order === 'asc' ? 'desc' : 'asc'}`} style={{ color: 'inherit', textDecoration: 'none' }}>Responsável {sort === 'responsavel' ? (order === 'asc' ? '↑' : '↓') : ''}</Link></th>
                 <th style={{ padding: '1rem 0.5rem', fontWeight: 500 }}>Ações</th>

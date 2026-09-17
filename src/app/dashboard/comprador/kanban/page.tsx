@@ -132,7 +132,7 @@ export default async function KanbanPage(props: { searchParams: Promise<{ [key: 
                         </h3>
                         
                         <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.5rem' }}>
-                          Solicitante: {req.requester?.name || 'Desconhecido'}
+                          Solicitante: {req.requester?.name || 'Desconhecido'} ({req.requester?.department?.name || 'Sem Setor'})
                         </div>
                         
                         {(req.currentStatus !== 'CRIADA' && req.currentStatus !== 'URGENTE') && (

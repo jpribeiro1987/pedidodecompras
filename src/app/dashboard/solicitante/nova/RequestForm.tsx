@@ -13,11 +13,13 @@ export function RequestForm({
 }: { 
   user: any,
   groups: any[], 
-  targetUsers?: any[], 
+  targetUsers?: any[],
+  allUsers?: any[], 
   isComprador?: boolean,
   departments?: any[]
 }) {
   const router = useRouter()
+  const [observerIds, setObserverIds] = useState<string[]>([])
   const [items, setItems] = useState([{ 
     description: '', 
     quantity: 1, 
