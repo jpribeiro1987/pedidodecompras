@@ -105,7 +105,7 @@ export default async function KanbanPage(props: { searchParams: Promise<{ [key: 
                   <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.875rem', padding: '2rem 0' }}>Vazio</p>
                 ) : (
                   colRequests.map(req => (
-                    <Link href={`/dashboard/comprador/pedido/${req.id}`} key={req.id} style={{ textDecoration: 'none' }}>
+                    <div key={req.id} style={{ textDecoration: 'none' }}>
                       <div style={{ 
                         backgroundColor: 'white', 
                         padding: '1rem', 
@@ -125,8 +125,10 @@ export default async function KanbanPage(props: { searchParams: Promise<{ [key: 
                         </div>
                         
                         <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.5rem', lineHeight: '1.2' }}>
-                          {req.items && req.items.length > 0 ? req.items[0].description : req.description}
-                          {req.items && req.items.length > 1 && ` (+${req.items.length - 1})`}
+                          <Link href={`/dashboard/comprador/pedido/${req.id}`} style={{ color: 'inherit', textDecoration: 'none', display: 'block' }}>
+                            {req.items && req.items.length > 0 ? req.items[0].description : req.description}
+                            {req.items && req.items.length > 1 && ` (+${req.items.length - 1})`}
+                          </Link>
                         </h3>
                         
                         <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.5rem' }}>
@@ -155,7 +157,7 @@ export default async function KanbanPage(props: { searchParams: Promise<{ [key: 
                           </span>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   ))
                 )}
               </div>

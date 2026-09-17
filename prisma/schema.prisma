@@ -47,6 +47,7 @@ model User {
   autoApproveLimit Float?            // Limite de alçada exclusivo para COMPRADOR
   requests         PurchaseRequest[] @relation("Requester")
   requestsAssigned PurchaseRequest[] @relation("AssignedBuyer")
+  observedRequests PurchaseRequest[] @relation("RequestObservers")
   statusHistory    StatusHistory[]   @relation("HistoryActor")
   comments         Comment[]         @relation("CommentAuthor")
 }
@@ -62,6 +63,7 @@ model PurchaseRequest {
   
   // Novos campos:
   classification  String?         // Consumo, Equipamento, Serviço
+  consumptionLocation String?     // Local de Consumo / Aplicação
   groupId         String?
   group           PurchaseGroup?  @relation(fields: [groupId], references: [id])
   batchId         String?         // Agrupa múltiplos pedidos feitos juntos
@@ -87,6 +89,7 @@ model PurchaseRequest {
   history            StatusHistory[]
   comments           Comment[]
   attachments        Attachment[]
+  observers          User[]          @relation("RequestObservers")
 
   items              PurchaseItem[]
 

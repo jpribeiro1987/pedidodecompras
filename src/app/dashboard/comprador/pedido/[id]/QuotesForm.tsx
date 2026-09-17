@@ -12,6 +12,7 @@ export function QuotesForm({
   criteriaList = [],
   existingQuotes = [],
   existingWinnerCriteria = '',
+  existingWinnerJustification = '',
   existingDeliveryDate = ''
 }: { 
   requestId: string, 
@@ -20,6 +21,7 @@ export function QuotesForm({
   criteriaList?: string[],
   existingQuotes?: any[],
   existingWinnerCriteria?: string,
+  existingWinnerJustification?: string,
   existingDeliveryDate?: string
 }) {
   const router = useRouter()
@@ -231,7 +233,7 @@ export function QuotesForm({
 
         <div style={{ marginBottom: '1.5rem' }}>
           <label htmlFor="winnerJustification">Justificativa da Escolha (Obrigatório se não for o Menor Preço)</label>
-          <textarea id="winnerJustification" name="winnerJustification" className="input-field" rows={2} required={winnerCriteria !== (criteriaList[0] || 'Menor Preço')} placeholder="Explique por que esta cotação foi a escolhida..." />
+          <textarea id="winnerJustification" name="winnerJustification" className="input-field" rows={2} required={winnerCriteria !== (criteriaList[0] || 'Menor Preço')} placeholder="Explique por que esta cotação foi a escolhida..." defaultValue={existingWinnerJustification} />
         </div>
 
         {canAutoApprove ? (

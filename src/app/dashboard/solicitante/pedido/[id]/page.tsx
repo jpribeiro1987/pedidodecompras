@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AttachmentViewer } from '@/components/AttachmentViewer'
 import { ConfirmButton } from '@/components/ConfirmButton'
+import ManageObservers from '@/components/ManageObservers'
 
 export default async function PedidoDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser()
+    const allUsers = await prisma.user.findMany({ select: { id: true, name: true, email: true }, orderBy: { name: 'asc' } })
   if (!user) return null
   
   const { id } = await params

@@ -39,7 +39,7 @@ async function getTransporter() {
 export async function sendPickupStatusEmail(requestId: string, status: 'DISPONIVEL_RETIRADA' | 'ENTREGUE') {
   const request = await prisma.purchaseRequest.findUnique({
     where: { id: requestId },
-    include: { requester: true, items: true, attachments: true, history: { include: { user: true }, orderBy: { date: 'desc' } }, department: true, group: true, buyer: true }
+    include: { requester: true, items: true, attachments: true, history: { include: { user: true }, orderBy: { date: 'desc' } }, department: true, group: true, buyer: true, observers: true }
   })
 
   if (!request) return
@@ -78,6 +78,9 @@ export async function sendPickupStatusEmail(requestId: string, status: 'DISPONIV
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;"><strong>Data da Solicitação:</strong><br/>${new Date(request.createdAt).toLocaleDateString('pt-BR')}</td>
               <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;"><strong>Prioridade:</strong><br/>${request.priority || 'Normal'}</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding: 10px; border-bottom: 1px solid #e2e8f0;"><strong>Local de Consumo / Aplicação:</strong><br/>${request.consumptionLocation || 'Não informado'}</td>
             </tr>
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;"><strong>Setor Solicitante:</strong><br/>${request.department?.name || 'Não informado'}</td>
@@ -140,6 +143,7 @@ export async function sendPickupStatusEmail(requestId: string, status: 'DISPONIV
     await mailer.sendMail({
       from,
       to: request.requester.email,
+      cc: request.observers?.map(obs => obs.email).join(',') || undefined,
       subject,
       html,
       attachments
@@ -153,7 +157,7 @@ export async function sendPickupStatusEmail(requestId: string, status: 'DISPONIV
 export async function sendManualStatusEmail(requestId: string) {
   const request = await prisma.purchaseRequest.findUnique({
     where: { id: requestId },
-    include: { requester: true, items: true, attachments: true, history: { include: { user: true }, orderBy: { date: 'desc' } }, department: true, group: true, buyer: true }
+    include: { requester: true, items: true, attachments: true, history: { include: { user: true }, orderBy: { date: 'desc' } }, department: true, group: true, buyer: true, observers: true }
   })
 
   if (!request) throw new Error('Pedido não encontrado')
@@ -259,6 +263,7 @@ export async function sendManualStatusEmail(requestId: string) {
   await mailer.sendMail({
     from,
     to: request.requester.email,
+    cc: request.observers?.map(obs => obs.email).join(',') || undefined,
     subject,
     html,
     attachments

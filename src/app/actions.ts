@@ -110,6 +110,7 @@ export async function createRequestAction(formData: FormData) {
           quantity: parseInt(item.quantity, 10),
           link: item.link || null,
           justification,
+          consumptionLocation: formData.get('consumptionLocation') as string | null,
           batchId,
           priority: item.priority || 'MEDIA',
           classification: item.classification || 'Consumo',
@@ -191,6 +192,18 @@ export async function updateRequestStatusAction(formData: FormData) {
   const deliveryDate = formData.get('deliveryDate') as string
   const autoApproved = formData.get('autoApproved') === 'true'
 
+  // Upload attachments if any
+  const files = formData.getAll('attachments') as File[]
+  const fileUrls: {url: string, name: string}[] = []
+  for (const file of files) {
+    if (file && file.size > 0) {
+      const buffer = Buffer.from(await file.arrayBuffer())
+      const filename = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      require('fs').writeFileSync(require('path').join(process.cwd(), 'public/uploads', filename), buffer)
+      fileUrls.push({ url: '/uploads/' + filename, name: file.name })
+    }
+  }
+
   // Handle quotes from Comprador
   const quotesCount = parseInt(formData.get('quotesCount') as string || '0', 10)
   const quotesData = []
@@ -226,6 +239,7 @@ export async function updateRequestStatusAction(formData: FormData) {
       currentStatus: newStatus,
       // If Autorizador approves, they have already acknowledged it
       ...(isAutorizadorApproving ? { directorAcknowledged: true } : {}),
+        ...(fileUrls.length > 0 ? { attachments: { create: fileUrls } } : {}),
       ...(winnerCriteria ? { winnerCriteria } : {}),
       ...(winnerJustification ? { winnerJustification } : {}),
       ...(deliveryDate ? { deliveryDate: new Date(deliveryDate) } : {}),
@@ -529,6 +543,20 @@ export async function markAsDeliveredAction(formData: FormData) {
   if (!user) return { error: 'Não autorizado' }
 
   const id = formData.get('id') as string
+  const observation = formData.get('observation') as string || 'Mercadoria informada com retirada (Entregue)';
+  
+  // Upload attachments if any
+  const files = formData.getAll('attachments') as File[];
+  const fileUrls: {url: string, name: string}[] = [];
+  for (const file of files) {
+    if (file && file.size > 0) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const filename = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      require('fs').writeFileSync(require('path').join(process.cwd(), 'public/uploads', filename), buffer);
+      fileUrls.push({ url: '/uploads/' + filename, name: file.name });
+    }
+  }
+
   const request = await prisma.purchaseRequest.findUnique({ where: { id } })
   if (!request) return { error: 'Pedido não encontrado' }
 
@@ -537,11 +565,12 @@ export async function markAsDeliveredAction(formData: FormData) {
     data: {
       currentStatus: 'ENTREGUE',
       archived: true,
+      ...(fileUrls.length > 0 ? { attachments: { create: fileUrls } } : {}),
       history: {
         create: {
           previousStatus: request.currentStatus,
           newStatus: 'ENTREGUE',
-          observation: 'Mercadoria informada com retirada (Entregue)',
+          observation: observation,
           userId: user.id
         }
       }
@@ -551,6 +580,7 @@ export async function markAsDeliveredAction(formData: FormData) {
   const { sendPickupStatusEmail } = await import('@/lib/mailer')
   await sendPickupStatusEmail(id, 'ENTREGUE')
 
+  revalidatePath(`/dashboard/${user.role.toLowerCase()}`)
   revalidatePath(`/dashboard/${user.role.toLowerCase()}/pedido/${id}`)
 }
 

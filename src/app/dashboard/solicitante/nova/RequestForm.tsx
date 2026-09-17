@@ -29,6 +29,7 @@ export function RequestForm({
     previewUrls: [] as string[]
   }])
   const [justification, setJustification] = useState('')
+  const [consumptionLocation, setConsumptionLocation] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -121,6 +122,7 @@ export function RequestForm({
         })
         formData.append('items', JSON.stringify(itemsWithoutFiles))
         formData.append('justification', justification)
+        formData.append('consumptionLocation', consumptionLocation)
         
         const res = await createRequestAction(formData)
         
@@ -332,6 +334,18 @@ export function RequestForm({
             <option key={d.id} value={d.id}>{d.name}</option>
           ))}
         </select>
+      </div>
+      
+      <div style={{ marginBottom: '1.5rem' }}>
+        <label htmlFor="consumptionLocation">Local de Consumo / Aplicação (Opcional)</label>
+        <input 
+          id="consumptionLocation" 
+          className="input-field" 
+          type="text" 
+          value={consumptionLocation}
+          onChange={e => setConsumptionLocation(e.target.value)}
+          placeholder="Ex: Manutenção Ala 2..." 
+        />
       </div>
       
       <div style={{ marginBottom: '1.5rem' }}>

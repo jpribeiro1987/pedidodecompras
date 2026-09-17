@@ -8,24 +8,31 @@ import { notFound } from 'next/navigation'
 import { QuotesForm } from './QuotesForm'
 import { ExtendDeliveryForm } from './ExtendDeliveryForm'
 import { AttachmentViewer } from '@/components/AttachmentViewer'
+import ManageObservers from '@/components/ManageObservers'
 
-export default async function CompradorPedidoPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CompradorPedidoPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
   const user = await getCurrentUser()
-  if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR')) return null
+  const allUsers = await prisma.user.findMany({ select: { id: true, name: true, email: true }, orderBy: { name: 'asc' } })
+
+  if (!user || (user.role !== 'COMPRADOR' && user.role !== 'AUTORIZADOR' && user.role !== 'ADMIN')) return null
   
-  const { id } = await params
+  const id = params.id
 
   const request = await prisma.purchaseRequest.findUnique({
     where: { id },
     include: {
       requester: { include: { department: true } },
+      department: true,
+      group: true,
       attachments: true,
       items: true,
       quotes: { include: { supplier: true } },
       history: {
         include: { user: true },
         orderBy: { date: 'desc' }
-      }
+      },
+      observers: true
     }
   })
 
@@ -88,10 +95,12 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
         <div>
           {/* Info Card */}
           <div className="card">
+            <ManageObservers requestId={request.id} observers={request.observers} allUsers={allUsers} />
+            <br />
             <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
               Informações do Pedido
             </h2>
@@ -254,6 +263,10 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                     <label htmlFor="observation">Observação de Entrega/Retirada</label>
                     <input type="text" id="observation" name="observation" className="input-field" placeholder="Ex: Material chegou. Retirar no almoxarifado." required />
                   </div>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <label htmlFor="attachments">Anexar Fotos / Documentos (Opcional)</label>
+                    <input type="file" id="attachments" name="attachments" className="input-field" multiple accept="image/*,application/pdf" />
+                  </div>
                   <button type="submit" className="btn btn-primary" style={{ width: '100%', backgroundColor: '#22c55e', borderColor: '#22c55e' }}>
                     Marcar como "Disponível para Retirada"
                   </button>
@@ -271,6 +284,7 @@ export default async function CompradorPedidoPage({ params }: { params: Promise<
                 criteriaList={criteriaList} 
                 existingQuotes={request.quotes}
                 existingWinnerCriteria={request.winnerCriteria || ''}
+                existingWinnerJustification={request.winnerJustification || ''}
                 existingDeliveryDate={request.deliveryDate ? request.deliveryDate.toISOString() : ''}
               />
             ) : null}
