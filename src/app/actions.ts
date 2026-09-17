@@ -705,3 +705,16 @@ export async function updateRequestActionData(data: { id: string, justification:
 
   return { success: true }
 }
+
+export async function sendManualEmailAction(requestId: string) {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'COMPRADOR') return { error: 'Não autorizado' }
+  
+  const { sendManualStatusEmail } = await import('@/lib/mailer')
+  try {
+    await sendManualStatusEmail(requestId)
+    return { success: true }
+  } catch(e: any) {
+    return { error: e.message }
+  }
+}

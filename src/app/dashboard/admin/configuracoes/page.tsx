@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/app/actions"
 import { updateConfigAction } from "@/app/adminActions"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import { TestSmtpButton } from "@/components/TestSmtpButton"
 
 export default async function ConfigPage() {
   const user = await getCurrentUser()
@@ -101,9 +102,12 @@ export default async function ConfigPage() {
             Para manter as configurações atuais em branco, apenas salve.
           </p>
 
-          <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
-            Salvar SMTP
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+            <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
+              Salvar SMTP
+            </button>
+            <TestSmtpButton />
+          </div>
         </form>
       </div>
     </div>

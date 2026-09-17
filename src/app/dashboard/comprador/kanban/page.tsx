@@ -2,6 +2,7 @@ import { getCurrentUser } from '@/app/actions'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import { SendManualEmailButton } from '@/components/SendManualEmailButton'
 import KanbanFilter from './KanbanFilter'
 
 export default async function KanbanPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
@@ -131,6 +132,12 @@ export default async function KanbanPage(props: { searchParams: Promise<{ [key: 
                         <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.5rem' }}>
                           Solicitante: {req.requester?.name || 'Desconhecido'}
                         </div>
+                        
+                        {(req.currentStatus !== 'CRIADA' && req.currentStatus !== 'URGENTE') && (
+                          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '0.5rem' }}>
+                            <SendManualEmailButton requestId={req.id} />
+                          </div>
+                        )}
 
                         <div style={{ 
                           display: 'flex', 

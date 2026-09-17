@@ -69,16 +69,26 @@ export default async function AdminBackupPage() {
                   <td style={{ padding: '1rem 0.5rem' }}>{f.date.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</td>
                   <td style={{ padding: '1rem 0.5rem' }}>{(f.size / 1024).toFixed(2)} KB</td>
                   <td style={{ padding: '1rem 0.5rem' }}>
-                    <form action={restoreBackupAction} style={{ display: 'inline' }}>
-                      <input type="hidden" name="fileName" value={f.name} />
-                      <ConfirmButton 
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <a 
+                        href={`/api/backup/download?file=${f.name}`} 
                         className="btn" 
-                        style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', color: '#991b1b', backgroundColor: '#fee2e2' }}
-                        message={`ATENÇÃO: Restaurar o backup '${f.name}' irá SOBRESCREVER todos os dados atuais do sistema! Você perderá tudo o que foi feito desde esse backup. Deseja continuar?`}
+                        style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', color: '#0369a1', backgroundColor: '#e0f2fe', textDecoration: 'none' }}
+                        download
                       >
-                        Restaurar Este Backup
-                      </ConfirmButton>
-                    </form>
+                        Baixar Local
+                      </a>
+                      <form action={restoreBackupAction} style={{ display: 'inline' }}>
+                        <input type="hidden" name="fileName" value={f.name} />
+                        <ConfirmButton 
+                          className="btn" 
+                          style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', color: '#991b1b', backgroundColor: '#fee2e2' }}
+                          message={`ATENÇÃO: Restaurar o backup '${f.name}' irá SOBRESCREVER todos os dados atuais do sistema! Você perderá tudo o que foi feito desde esse backup. Deseja continuar?`}
+                        >
+                          Restaurar Este Backup
+                        </ConfirmButton>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               ))}

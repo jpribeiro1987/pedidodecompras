@@ -101,3 +101,70 @@ export async function sendPickupStatusEmail(requestId: string, status: 'DISPONIV
     console.error('Failed to send status email:', error)
   }
 }
+
+export async function sendManualStatusEmail(requestId: string) {
+  const request = await prisma.purchaseRequest.findUnique({
+    where: { id: requestId },
+    include: { requester: true, items: true, attachments: true }
+  })
+
+  if (!request) throw new Error('Pedido não encontrado')
+  if (!request.requester.email) throw new Error('Solicitante não possui e-mail cadastrado')
+
+  const mailer = await getTransporter()
+  if (!mailer) throw new Error('SMTP não configurado')
+
+  const configFrom = await prisma.systemConfig.findUnique({ where: { key: 'SMTP_FROM' } })
+  const from = configFrom?.value || process.env.SMTP_FROM || '"Sistema de Compras" <no-reply@hospital.com>'
+
+  const statusMap: Record<string, string> = {
+    'CRIADA': 'Criada',
+    'URGENTE': 'Urgente',
+    'EM_COTACAO': 'Em Cotação',
+    'EM_ANALISE': 'Em Análise de Cotação',
+    'AGUARDANDO_AUTORIZACAO': 'Aguardando Autorização',
+    'AGUARDANDO_FINANCEIRO': 'Aguardando Financeiro',
+    'APROVADA': 'Aprovada',
+    'DISPONIVEL_RETIRADA': 'Disponível para Retirada',
+    'ENTREGUE': 'Retirado / Entregue',
+    'CANCELADA': 'Cancelada'
+  }
+  const statusName = statusMap[request.currentStatus] || request.currentStatus
+
+  const subject = `Pedido #${request.id.substring(0, 8).toUpperCase()} - Status: ${statusName}`
+  const statusText = `O seu pedido está atualmente no status: ${statusName}.`
+
+  const itemsListHtml = request.items.map(item => `<li>${item.quantity}x ${item.description}</li>`).join('')
+  
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+      <h2 style="color: #2563eb;">Atualização do Pedido de Compra</h2>
+      <p>Olá <strong>${request.requester.name}</strong>,</p>
+      <p style="font-size: 16px; font-weight: bold; padding: 12px; background-color: #f1f5f9; border-radius: 6px;">
+        ${statusText}
+      </p>
+      <p><strong>ID do Pedido:</strong> ${request.id.toUpperCase()}</p>
+      <p><strong>Itens:</strong></p>
+      <ul>
+        ${itemsListHtml || `<li>${request.description}</li>`}
+      </ul>
+      <br />
+      <p>As imagens anexadas ao pedido estão inclusas neste e-mail.</p>
+      <hr style="border: 1px solid #e2e8f0; margin: 24px 0;" />
+      <p style="font-size: 12px; color: #64748b;">Este é um e-mail automático do Sistema de Compras.</p>
+    </div>
+  `
+
+  const attachments = request.attachments.map(att => ({
+    filename: att.name,
+    path: join(process.cwd(), 'public', att.url)
+  }))
+
+  await mailer.sendMail({
+    from,
+    to: request.requester.email,
+    subject,
+    html,
+    attachments
+  })
+}

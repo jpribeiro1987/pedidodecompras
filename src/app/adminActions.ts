@@ -215,6 +215,47 @@ export async function updateSmtpConfigAction(formData: FormData) {
   revalidatePath("/dashboard/admin/configuracoes")
 }
 
+export async function testSmtpAction() {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'ADMIN') return { error: 'Não autorizado' }
+  
+  try {
+    const configParams = await prisma.systemConfig.findMany({
+      where: { key: { in: ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM'] } }
+    })
+    const config = configParams.reduce((acc, curr) => { acc[curr.key] = curr.value; return acc; }, {} as Record<string, string>);
+    const host = config['SMTP_HOST'] || process.env.SMTP_HOST
+    const userEmail = config['SMTP_USER'] || process.env.SMTP_USER
+    const pass = config['SMTP_PASS'] || process.env.SMTP_PASS
+
+    if (!host || !userEmail || !pass) {
+      return { error: 'Configuração SMTP incompleta. Salve as configurações antes de testar.' }
+    }
+
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      host,
+      port: parseInt(config['SMTP_PORT'] || process.env.SMTP_PORT || '587', 10),
+      secure: parseInt(config['SMTP_PORT'] || process.env.SMTP_PORT || '587', 10) === 465,
+      auth: { user: userEmail, pass }
+    })
+
+    const from = config['SMTP_FROM'] || process.env.SMTP_FROM || '"Sistema de Compras" <no-reply@hospital.com>'
+
+    await transporter.sendMail({
+      from,
+      to: user.email,
+      subject: 'Teste de Configuração SMTP',
+      text: 'Se você está recebendo este e-mail, as configurações SMTP estão funcionando corretamente!'
+    })
+
+    return { success: true }
+  } catch (error: any) {
+    console.error('SMTP Test Error:', error)
+    return { error: error.message || 'Erro ao tentar enviar o e-mail de teste.' }
+  }
+}
+
 export async function updateWinnerCriteriaAction(criteria: string[]) {
   const user = await getCurrentUser()
   if (!user || user.role !== 'ADMIN') return { error: 'Não autorizado' }
