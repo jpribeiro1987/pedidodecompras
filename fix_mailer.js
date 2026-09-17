@@ -1,10 +1,10 @@
 const fs = require('fs');
 let content = fs.readFileSync('src/lib/mailer.ts', 'utf8');
 
-// Include quotes in query for both sendPickupStatusEmail and sendManualStatusEmail
+// Update both query includes for buyer: true, observers: true }
 content = content.replace(/buyer: true, observers: true }/g, "buyer: true, observers: true, quotes: { include: { supplier: true } } }");
 
-// Generate quotes HTML
+// Replace all itemsListHtml with the quotes logic
 const quotesHtmlTarget = "const itemsListHtml = request.items.map(item => `<li>${item.quantity}x ${item.description}</li>`).join('')";
 const quotesHtmlReplace = `const itemsListHtml = request.items.map(item => \`<li>\${item.quantity}x \${item.description}</li>\`).join('')
   
@@ -36,12 +36,11 @@ const quotesHtmlReplace = `const itemsListHtml = request.items.map(item => \`<li
       </div>
     \`
   }`;
-content = content.replace(quotesHtmlTarget, quotesHtmlReplace);
-content = content.replace(quotesHtmlTarget, quotesHtmlReplace); // for the second function
+content = content.replace(new RegExp(quotesHtmlTarget.replace(/[.*+?^$\{value}()|[\]\\]/g, '\\$&'), 'g'), quotesHtmlReplace);
 
-const insertQuotesTarget = "      ${request.winnerJustification ? `\n      <div style=\"margin-top: 20px;\">";
-const insertQuotesReplace = "      ${quotesHtml}\n      ${request.winnerJustification ? `\n      <div style=\"margin-top: 20px;\">";
-content = content.replace(insertQuotesTarget, insertQuotesReplace);
-content = content.replace(insertQuotesTarget, insertQuotesReplace); // for the second function
+// Replace winnerJustification insert
+const insertQuotesTarget = "${request.winnerJustification ? `\n      <div style=\"margin-top: 20px;\">";
+const insertQuotesReplace = "${quotesHtml}\n      ${request.winnerJustification ? `\n      <div style=\"margin-top: 20px;\">";
+content = content.replace(new RegExp(insertQuotesTarget.replace(/[.*+?^$\{value}()|[\]\\]/g, '\\$&'), 'g'), insertQuotesReplace);
 
 fs.writeFileSync('src/lib/mailer.ts', content);
