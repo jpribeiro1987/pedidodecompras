@@ -39,7 +39,7 @@ async function getTransporter() {
 export async function sendPickupStatusEmail(requestId: string, status: 'DISPONIVEL_RETIRADA' | 'ENTREGUE') {
   const request = await prisma.purchaseRequest.findUnique({
     where: { id: requestId },
-    include: { requester: true, items: true, attachments: true }
+    include: { requester: true, items: true, attachments: true, history: { include: { user: true }, orderBy: { date: 'desc' } } }
   })
 
   if (!request) return
@@ -74,6 +74,28 @@ export async function sendPickupStatusEmail(requestId: string, status: 'DISPONIV
       <ul>
         ${itemsListHtml || `<li>${request.description}</li>`}
       </ul>
+      ${request.winnerJustification ? `
+      <div style="margin-top: 20px;">
+        <p><strong>Justificativa do Comprador (Cotação):</strong></p>
+        <p style="background-color: #f8fafc; padding: 12px; border-left: 4px solid #94a3b8; font-size: 14px; border-radius: 4px;">
+          ${request.winnerJustification}
+        </p>
+      </div>
+      ` : ''}
+
+      ${request.history.some(h => h.observation && h.observation.trim() !== 'Atualização de status' && h.observation.trim() !== 'Pedido editado' && !h.observation.startsWith('Mercadoria informada')) ? `
+      <div style="margin-top: 20px;">
+        <p><strong>Observações do Processo:</strong></p>
+        <ul style="background-color: #f8fafc; padding: 12px 12px 12px 30px; font-size: 14px; border-radius: 6px;">
+          ${request.history.filter(h => h.observation && h.observation.trim() !== 'Atualização de status' && h.observation.trim() !== 'Pedido editado' && !h.observation.startsWith('Mercadoria informada')).map(h => `
+            <li style="margin-bottom: 8px;">
+              <strong>${new Date(h.date).toLocaleDateString('pt-BR')}:</strong> ${h.observation}
+              <br/><span style="font-size: 11px; color: #64748b;">(por ${h.user?.name || 'Sistema'})</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+      ` : ''}
       <br />
       <p>As imagens anexadas ao pedido estão inclusas neste e-mail.</p>
       <hr style="border: 1px solid #e2e8f0; margin: 24px 0;" />
@@ -105,7 +127,7 @@ export async function sendPickupStatusEmail(requestId: string, status: 'DISPONIV
 export async function sendManualStatusEmail(requestId: string) {
   const request = await prisma.purchaseRequest.findUnique({
     where: { id: requestId },
-    include: { requester: true, items: true, attachments: true }
+    include: { requester: true, items: true, attachments: true, history: { include: { user: true }, orderBy: { date: 'desc' } } }
   })
 
   if (!request) throw new Error('Pedido não encontrado')
@@ -148,6 +170,28 @@ export async function sendManualStatusEmail(requestId: string) {
       <ul>
         ${itemsListHtml || `<li>${request.description}</li>`}
       </ul>
+      ${request.winnerJustification ? `
+      <div style="margin-top: 20px;">
+        <p><strong>Justificativa do Comprador (Cotação):</strong></p>
+        <p style="background-color: #f8fafc; padding: 12px; border-left: 4px solid #94a3b8; font-size: 14px; border-radius: 4px;">
+          ${request.winnerJustification}
+        </p>
+      </div>
+      ` : ''}
+
+      ${request.history.some(h => h.observation && h.observation.trim() !== 'Atualização de status' && h.observation.trim() !== 'Pedido editado' && !h.observation.startsWith('Mercadoria informada')) ? `
+      <div style="margin-top: 20px;">
+        <p><strong>Observações do Processo:</strong></p>
+        <ul style="background-color: #f8fafc; padding: 12px 12px 12px 30px; font-size: 14px; border-radius: 6px;">
+          ${request.history.filter(h => h.observation && h.observation.trim() !== 'Atualização de status' && h.observation.trim() !== 'Pedido editado' && !h.observation.startsWith('Mercadoria informada')).map(h => `
+            <li style="margin-bottom: 8px;">
+              <strong>${new Date(h.date).toLocaleDateString('pt-BR')}:</strong> ${h.observation}
+              <br/><span style="font-size: 11px; color: #64748b;">(por ${h.user?.name || 'Sistema'})</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+      ` : ''}
       <br />
       <p>As imagens anexadas ao pedido estão inclusas neste e-mail.</p>
       <hr style="border: 1px solid #e2e8f0; margin: 24px 0;" />
