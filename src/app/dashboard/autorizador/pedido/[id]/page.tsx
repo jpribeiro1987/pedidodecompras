@@ -54,7 +54,7 @@ export default async function AutorizadorPedidoPage({ params }: { params: Promis
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
         <div>
           <div className="card" style={{ marginBottom: '2rem' }}>
             <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>

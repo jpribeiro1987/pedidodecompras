@@ -95,7 +95,7 @@ export default async function CompradorPedidoPage(props: { params: Promise<{ id:
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
         <div>
           {/* Info Card */}
           <div className="card">
