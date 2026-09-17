@@ -708,7 +708,9 @@ export async function updateRequestActionData(data: { id: string, justification:
 
 export async function sendManualEmailAction(requestId: string) {
   const user = await getCurrentUser()
-  if (!user || user.role !== 'COMPRADOR') return { error: 'Não autorizado' }
+  if (!user || !['COMPRADOR', 'AUTORIZADOR', 'ADMIN'].includes(user.role)) {
+    return { error: 'Não autorizado' }
+  }
   
   const { sendManualStatusEmail } = await import('@/lib/mailer')
   try {
