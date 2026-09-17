@@ -46,7 +46,7 @@ export default async function KanbanPage(props: { searchParams: Promise<{ [key: 
       {
         id: 'cotacao',
         title: 'Em Cotação',
-        statuses: ['EM_COTACAO', 'EM_ANALISE'],
+        statuses: ['EM_COTACAO', 'EM_ANALISE', 'AJUSTES_COMPRADOR'],
         color: '#eab308', // yellow
         bgColor: '#fefce8'
       },

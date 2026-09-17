@@ -14,7 +14,7 @@ export default async function CompradorDashboard({ searchParams }: { searchParam
     OR: [
       {
         currentStatus: {
-          in: ['CRIADA', 'EM_ANALISE', 'EM_COTACAO', 'DEVOLVIDO', 'AGUARDANDO_FINANCEIRO', 'APROVADA', 'RECUSADA']
+          in: ['CRIADA', 'EM_ANALISE', 'EM_COTACAO', 'DEVOLVIDO', 'AGUARDANDO_FINANCEIRO', 'APROVADA', 'RECUSADA', 'AJUSTES_COMPRADOR']
         }
       },
       { currentStatus: 'DISPONIVEL_RETIRADA' }

@@ -58,7 +58,7 @@ export default async function RelatoriosPage({
 
   // Get distinct statuses for the filter dropdown
   const allStatuses = [
-    'CRIADA', 'EM_ANALISE', 'EM_COTACAO', 'AGUARDANDO_AUTORIZACAO', 
+    'CRIADA', 'EM_ANALISE', 'EM_COTACAO', 'AJUSTES_COMPRADOR', 'AGUARDANDO_AUTORIZACAO', 
     'AGUARDANDO_FINANCEIRO', 'APROVADA', 'RECUSADA', 'REJEITADA', 
     'DEVOLVIDO', 'DISPONIVEL_RETIRADA', 'ARQUIVADA'
   ]

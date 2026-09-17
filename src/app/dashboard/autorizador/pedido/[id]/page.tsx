@@ -233,7 +233,7 @@ export default async function AutorizadorPedidoPage({ params }: { params: Promis
                   <select id="status" name="status" className="input-field" required defaultValue="AGUARDANDO_FINANCEIRO">
                     <option value="AGUARDANDO_FINANCEIRO">Aprovar Compra</option>
                     <option value="RECUSADA">Rejeitar Compra</option>
-                    <option value="EM_COTACAO">Devolver ao Comprador (Ajustes)</option>
+                    <option value="AJUSTES_COMPRADOR">Devolver ao Comprador (Ajustes)</option>
                   </select>
                 </div>
 

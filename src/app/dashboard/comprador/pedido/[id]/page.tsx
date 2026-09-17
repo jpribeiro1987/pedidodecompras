@@ -289,7 +289,7 @@ export default async function CompradorPedidoPage(props: { params: Promise<{ id:
               />
             ) : null}
 
-            {['CRIADA', 'EM_ANALISE', 'EM_COTACAO'].includes(request.currentStatus) && (
+            {['CRIADA', 'EM_ANALISE', 'EM_COTACAO', 'AJUSTES_COMPRADOR'].includes(request.currentStatus) && (
               <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: '#f59e0b' }}>Devolver para Ajustes (Kanban)</h3>
                 <form action={async (formData) => {
@@ -309,7 +309,7 @@ export default async function CompradorPedidoPage(props: { params: Promise<{ id:
               </div>
             )}
 
-            {['CRIADA', 'EM_COTACAO', 'AGUARDANDO_AUTORIZACAO', 'AGUARDANDO_FINANCEIRO'].includes(request.currentStatus) && (
+            {['CRIADA', 'EM_COTACAO', 'AGUARDANDO_AUTORIZACAO', 'AGUARDANDO_FINANCEIRO', 'AJUSTES_COMPRADOR'].includes(request.currentStatus) && (
               <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid var(--border)' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: '#ef4444' }}>Recusar Solicitação</h3>
                 <form action={async (formData) => {
